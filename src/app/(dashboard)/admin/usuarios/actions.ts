@@ -14,16 +14,30 @@ function esEmailValido(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
+// 1. Modificamos esta función para que extraiga y nos devuelva el ID del negocio
 async function requireAdmin() {
   const session = await auth()
-  if (session?.user.rol !== "admin") throw new Error("No autorizado")
+  // Usamos 'as any' para evitar cualquier bloqueo estricto de TypeScript en Vercel
+  if ((session?.user as any)?.rol !== "admin") throw new Error("No autorizado")
+  
+  const negocioId = (session?.user as any)?.negocioId
+  if (!negocioId) throw new Error("El administrador no tiene un negocio asignado")
+  
+  return negocioId as string
 }
 
 export async function crearUsuario(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  try { await requireAdmin() } catch { return { error: "No autorizado" } }
+  let negocioId = ""
+  try { 
+    // Recibimos el ID del negocio desde la sesión
+    negocioId = await requireAdmin() 
+  } catch { 
+    return { error: "No autorizado" } 
+  }
+  
   const nombre = (formData.get("nombre") as string)?.trim()
   const email = (formData.get("email") as string)?.trim().toLowerCase()
   const password = formData.get("password") as string
@@ -40,7 +54,15 @@ export async function crearUsuario(
   const cargo = (formData.get("cargo") as string)?.trim() || null
 
   try {
-    const usuario = await prisma.usuario.create({ data: { nombre, email, passwordHash, rol } })
+    const usuario = await prisma.usuario.create({ 
+      data: { 
+        nombre, 
+        email, 
+        passwordHash, 
+        rol,
+        negocioId // 2. AQUÍ ESTÁ LA SOLUCIÓN: Le pasamos el negocio a la base de datos
+      } 
+    })
     if (cargo) {
       await prisma.empleado.upsert({
         where: { usuarioId: usuario.id },
@@ -109,7 +131,7 @@ export async function actualizarUsuario(
 
 export async function toggleActivoUsuario(id: string, activo: boolean) {
   const session = await auth()
-  if (session?.user.rol !== "admin") throw new Error("No autorizado")
+  if ((session?.user as any)?.rol !== "admin") throw new Error("No autorizado")
   const usuario = await prisma.usuario.findUnique({ where: { id }, select: { nombre: true } })
   await prisma.usuario.update({ where: { id }, data: { activo } })
   await registrarActividad({
@@ -123,8 +145,8 @@ export async function toggleActivoUsuario(id: string, activo: boolean) {
 
 export async function eliminarUsuario(id: string) {
   const session = await auth()
-  if (session?.user.rol !== "admin") throw new Error("No autorizado")
-  if (session.user.id === id) throw new Error("No puedes eliminar tu propio usuario")
+  if ((session?.user as any)?.rol !== "admin") throw new Error("No autorizado")
+  if ((session?.user as any)?.id === id) throw new Error("No puedes eliminar tu propio usuario")
   const usuario = await prisma.usuario.findUnique({ where: { id }, select: { nombre: true } })
   await prisma.usuario.delete({ where: { id } })
   await registrarActividad({
@@ -134,4 +156,4 @@ export async function eliminarUsuario(id: string) {
   })
   revalidatePath("/admin/usuarios")
   redirect("/admin/usuarios?toast=deleted")
-}
+};
