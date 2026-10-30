@@ -1,0 +1,528 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ──────────────────────────────────────────
+// Enums Universales
+// ──────────────────────────────────────────
+
+enum Rol {
+  admin
+  especialista
+  recepcionista
+  asistente
+}
+
+enum EstadoCita {
+  pendiente
+  confirmada
+  cancelada
+  atendida
+}
+
+enum TipoMovimiento {
+  entrada
+  salida
+  ajuste
+}
+
+enum MetodoPago {
+  efectivo
+  tarjeta
+  transferencia
+  otro
+}
+
+enum CategoriaEgreso {
+  insumos
+  nomina
+  servicios
+  arriendo
+  otro
+}
+
+// ──────────────────────────────────────────
+// Configuración SaaS (Multi-Tenant)
+// ──────────────────────────────────────────
+model Negocio {
+  id             String    @id @default(cuid())
+  nombre         String
+  logoUrl        String?
+  tipoNegocio    String    @default("veterinaria")
+  modulosActivos String[]  
+  
+  // Relaciones de aislamiento (Los muros de contención)
+  usuarios       Usuario[]
+  clientes       Cliente[]
+  fichas         Ficha[]
+  atenciones     Atencion[]
+  citas          Cita[]
+  productos      Producto[]
+  movimientos    MovimientoInventario[]
+  cobros         Cobro[]
+  egresos        Egreso[]
+  recordatorios  Recordatorio[]
+  facturas       Factura[]
+  registros      RegistroActividad[]
+
+  creadoEn       DateTime  @default(now())
+  actualizadoEn  DateTime  @updatedAt
+
+  @@map("negocios")
+}
+
+// ──────────────────────────────────────────
+// Autenticación y personal
+// ──────────────────────────────────────────
+
+model Usuario {
+  id           String  @id @default(cuid())
+  nombre       String
+  email        String  @unique
+  passwordHash String
+  rol          Rol     @default(recepcionista)
+  activo       Boolean @default(true)
+
+  negocioId    String
+  negocio      Negocio @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+  
+  empleado           Empleado?
+  atenciones         Atencion[]
+  controles          ControlPreventivo[]
+  citas              Cita[]
+  movimientosCreados MovimientoInventario[]
+  cobrosCreados      Cobro[]
+  egresosCreados     Egreso[]
+  recordatorios      Recordatorio[]
+  facturasCreadas    Factura[]
+  recomendaciones    Recomendacion[]
+
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@map("usuarios")
+}
+
+model Empleado {
+  id        String  @id @default(cuid())
+  usuarioId String  @unique
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  cargo     String?
+  telefono  String?
+  direccion String?
+
+  horaEntrada   String?
+  horaSalida    String?
+  diasLaborales String[]
+
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@map("empleados")
+}
+
+// ──────────────────────────────────────────
+// Clientes y Fichas (Camaleón)
+// ──────────────────────────────────────────
+
+model Cliente {
+  id             String  @id @default(cuid())
+  nombre         String
+  identificacion String? @unique
+  telefono       String?
+  email          String?
+  direccion      String?
+  notas          String?
+
+  // Aislamiento
+  negocioId      String?
+  negocio        Negocio? @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+
+  fichas        Ficha[]
+  cobros        Cobro[]
+  recordatorios Recordatorio[]
+  facturas      Factura[]
+
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@map("clientes")
+}
+
+model Ficha {
+  id             String    @id @default(cuid())
+  nombre         String    
+  tipo           String    @default("General")
+  foto           String?
+  notas          String?
+  
+  datosGenerales Json?      
+
+  // Aislamiento
+  negocioId      String?
+  negocio        Negocio? @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+
+  clienteId      String
+  cliente        Cliente   @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  atenciones      Atencion[]
+  controles       ControlPreventivo[]
+  citas           Cita[]
+  cobros          Cobro[]
+  recordatorios   Recordatorio[]
+  facturas        Factura[]
+  recomendaciones Recomendacion[]
+  adjuntos        Adjunto[]
+
+  creadoEn       DateTime @default(now())
+  actualizadoEn  DateTime @updatedAt
+
+  @@map("fichas")
+}
+
+model Adjunto {
+  id          String   @id @default(cuid())
+  nombre      String
+  tipo        String
+  extension   String
+  tamano      Int
+  descripcion String?
+  fichaId     String
+  ficha       Ficha    @relation(fields: [fichaId], references: [id], onDelete: Cascade)
+  creadoEn    DateTime @default(now())
+
+  @@map("adjuntos")
+}
+
+// ──────────────────────────────────────────
+// Historial / Atenciones
+// ──────────────────────────────────────────
+
+model Atencion {
+  id             String   @id @default(cuid())
+  fecha          DateTime @default(now())
+  motivo         String
+  
+  detalles       Json?    
+  
+  // Aislamiento
+  negocioId      String?
+  negocio        Negocio? @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+
+  fichaId        String
+  ficha          Ficha    @relation(fields: [fichaId], references: [id], onDelete: Cascade)
+  
+  especialistaId String?
+  especialista   Usuario? @relation(fields: [especialistaId], references: [id])
+
+  creadoEn       DateTime @default(now())
+  actualizadoEn  DateTime @updatedAt
+
+  @@map("atenciones")
+}
+
+model ControlPreventivo {
+  id             String    @id @default(cuid())
+  tipo           String    
+  nombre         String    
+  fecha          DateTime
+  notas          String?
+  proximaFecha   DateTime? 
+
+  fichaId        String
+  ficha          Ficha     @relation(fields: [fichaId], references: [id], onDelete: Cascade)
+  
+  especialistaId String?
+  especialista   Usuario?  @relation(fields: [especialistaId], references: [id])
+
+  creadoEn       DateTime  @default(now())
+
+  @@map("controles_preventivos")
+}
+
+// ──────────────────────────────────────────
+// Agenda
+// ──────────────────────────────────────────
+
+model Cita {
+  id             String     @id @default(cuid())
+  fecha          DateTime
+  motivo         String
+  tipo           String     @default("Consulta") 
+  estado         EstadoCita @default(pendiente)
+  notas          String?
+
+  // Aislamiento
+  negocioId      String?
+  negocio        Negocio? @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+
+  fichaId        String
+  ficha          Ficha      @relation(fields: [fichaId], references: [id], onDelete: Cascade)
+
+  especialistaId String?
+  especialista   Usuario?   @relation(fields: [especialistaId], references: [id])
+
+  creadoEn       DateTime   @default(now())
+  actualizadoEn  DateTime   @updatedAt
+
+  @@map("citas")
+}
+
+// ──────────────────────────────────────────
+// Inventario
+// ──────────────────────────────────────────
+
+model Producto {
+  id          String   @id @default(cuid())
+  nombre      String
+  categoria   String   @default("General")
+  unidad      String   @default("unidad")
+  stock       Float    @default(0)
+  stockMinimo Float    @default(0)
+  precioCosto Float?
+  precioVenta Float?
+  proveedor   String?
+  notas       String?
+
+  // Aislamiento
+  negocioId      String?
+  negocio        Negocio? @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+
+  movimientos  MovimientoInventario[]
+  facturaItems FacturaItem[]
+
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@map("productos")
+}
+
+model MovimientoInventario {
+  id         String         @id @default(cuid())
+  tipo       TipoMovimiento
+  cantidad   Float
+  motivo     String?
+  fecha      DateTime       @default(now())
+
+  // Aislamiento
+  negocioId      String?
+  negocio        Negocio? @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+
+  productoId String
+  producto   Producto       @relation(fields: [productoId], references: [id], onDelete: Cascade)
+
+  usuarioId  String?
+  usuario    Usuario?       @relation(fields: [usuarioId], references: [id])
+
+  facturaId  String?
+  factura    Factura?       @relation(fields: [facturaId], references: [id], onDelete: SetNull)
+
+  @@map("movimientos_inventario")
+}
+
+// ──────────────────────────────────────────
+// Finanzas 
+// ──────────────────────────────────────────
+
+model Cobro {
+  id         String     @id @default(cuid())
+  numero     Int        @unique @default(autoincrement())
+  fecha      DateTime   @default(now())
+  concepto   String
+  monto      Float
+  metodoPago MetodoPago @default(efectivo)
+  notas      String?
+
+  // Aislamiento
+  negocioId      String?
+  negocio        Negocio? @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+
+  clienteId  String?
+  cliente    Cliente?   @relation(fields: [clienteId], references: [id])
+
+  fichaId    String?
+  ficha      Ficha?     @relation(fields: [fichaId], references: [id])
+
+  usuarioId  String?
+  usuario    Usuario?   @relation(fields: [usuarioId], references: [id])
+
+  facturaId  String?    @unique
+  factura    Factura?   @relation(fields: [facturaId], references: [id], onDelete: Cascade)
+
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@map("cobros")
+}
+
+model Egreso {
+  id        String          @id @default(cuid())
+  fecha     DateTime        @default(now())
+  concepto  String
+  monto     Float
+  categoria CategoriaEgreso @default(otro)
+  proveedor String?
+  notas     String?
+
+  // Aislamiento
+  negocioId      String?
+  negocio        Negocio? @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+
+  usuarioId String?
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id])
+
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@map("egresos")
+}
+
+model Recordatorio {
+  id         String   @id @default(cuid())
+  mensaje    String
+  fecha      DateTime
+  completado Boolean  @default(false)
+
+  // Aislamiento
+  negocioId      String?
+  negocio        Negocio? @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+
+  clienteId  String?
+  cliente    Cliente? @relation(fields: [clienteId], references: [id])
+
+  fichaId    String?
+  ficha      Ficha?   @relation(fields: [fichaId], references: [id])
+
+  usuarioId  String?
+  usuario    Usuario? @relation(fields: [usuarioId], references: [id])
+
+  creadoEn   DateTime @default(now())
+
+  @@map("recordatorios")
+}
+
+model Factura {
+  id            String   @id @default(cuid())
+  numero        Int      @unique @default(autoincrement())
+  fecha         DateTime @default(now())
+  condicion     String   @default("Contado")
+  observaciones String?
+  porcentajeIva Float    @default(19)
+  subtotal      Float    @default(0)
+  total         Float    @default(0)
+
+  // Aislamiento
+  negocioId      String?
+  negocio        Negocio? @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+
+  clienteId     String?
+  cliente       Cliente? @relation(fields: [clienteId], references: [id])
+
+  fichaId       String?
+  ficha         Ficha?   @relation(fields: [fichaId], references: [id])
+
+  usuarioId     String?
+  usuario       Usuario? @relation(fields: [usuarioId], references: [id])
+
+  items         FacturaItem[]
+  cobro         Cobro?
+  movimientos   MovimientoInventario[]
+
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@map("facturas")
+}
+
+model FacturaItem {
+  id          String    @id @default(cuid())
+  orden       Int       @default(0)
+  descripcion String
+  cantidad    Float
+  precioUnit  Float
+  total       Float
+
+  facturaId   String
+  factura     Factura   @relation(fields: [facturaId], references: [id], onDelete: Cascade)
+
+  productoId  String?
+  producto    Producto? @relation(fields: [productoId], references: [id], onDelete: SetNull)
+
+  @@map("factura_items")
+}
+
+// ──────────────────────────────────────────
+// Recomendaciones / Notas
+// ──────────────────────────────────────────
+
+model Recomendacion {
+  id             String   @id @default(cuid())
+  fecha          DateTime @default(now())
+
+  fichaId        String
+  ficha          Ficha    @relation(fields: [fichaId], references: [id], onDelete: Cascade)
+
+  especialistaId String?
+  especialista   Usuario? @relation(fields: [especialistaId], references: [id])
+
+  items          RecomendacionItem[]
+
+  creadoEn       DateTime @default(now())
+  actualizadoEn  DateTime @updatedAt
+
+  @@map("recomendaciones")
+}
+
+model RecomendacionItem {
+  id              String        @id @default(cuid())
+  orden           Int           @default(0)
+  item            String        
+  instrucciones   String
+
+  recomendacionId String
+  recomendacion   Recomendacion @relation(fields: [recomendacionId], references: [id], onDelete: Cascade)
+
+  @@map("recomendacion_items")
+}
+
+// ──────────────────────────────────────────
+// Auditoría
+// ──────────────────────────────────────────
+
+model RegistroActividad {
+  id            String   @id @default(cuid())
+  fecha         DateTime @default(now())
+  usuarioNombre String
+  usuarioEmail  String
+  usuarioRol    String
+  accion        String   
+  modulo        String   
+  entidad       String   
+  detalle       String?  
+
+  // Aislamiento
+  negocioId      String?
+  negocio        Negocio? @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+
+  @@map("registros_actividad")
+}
+
+// ------------------------------------------------------
+// MÓDULO DE SEGURIDAD Y RECUPERACIÓN
+// ------------------------------------------------------
+
+model TokenRecuperacion {
+  id         String   @id @default(cuid())
+  email      String
+  token      String   @unique
+  expiracion DateTime
+  creadoEn   DateTime @default(now())
+
+  @@index([email])
+}

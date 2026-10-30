@@ -1,0 +1,29 @@
+﻿@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+/* Teal accent para selects, checkboxes, radios y range */
+select,
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"] {
+  accent-color: #1E3A6E;
+}
+
+.material-symbols-outlined {
+  font-family: var(--font-iconos), "Material Symbols Outlined";
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+}
