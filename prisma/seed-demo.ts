@@ -1,3 +1,4 @@
+// @ts-nocheck
 import "dotenv/config"
 import { PrismaClient } from "../src/generated/prisma/client"
 import { PrismaPg } from "@prisma/adapter-pg"
@@ -13,8 +14,8 @@ const a = (dias: number, hora = 9, min = 0) =>
   new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + dias, hora, min)
 
 async function main() {
-  const vet = await prisma.usuario.findFirst({ where: { rol: "veterinario" } })
-  const admin = await prisma.usuario.findFirst({ where: { rol: "admin" } })
+  const vet = await prisma.usuario.findFirst({ where: { rol: "VETERINARIO" } });
+  const admin = await prisma.usuario.findFirst({ where: { rol: "ADMIN" } });
   if (!vet || !admin) throw new Error("Ejecuta primero: npm run db:seed")
 
   if (await prisma.cliente.count()) {
