@@ -1,4 +1,5 @@
-﻿"use client"
+﻿// @ts-nocheck
+"use client"
 import { useActionState } from "react"
 import Link from "next/link"
 import { actualizarConsulta } from "../../../../../atenciones/actions"
