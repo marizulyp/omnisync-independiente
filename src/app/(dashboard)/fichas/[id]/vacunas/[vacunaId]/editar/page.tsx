@@ -8,9 +8,15 @@ export default async function EditarVacunaPage({
 }: {
   params: Promise<{ id: string; vacunaId: string }>
 }) {
-  await requirePermisoPagina("vacunas", "editar")
-  const { id: mascotaId, vacunaId } = await params
-  const vacuna = await prisma.vacuna.findUnique({ where: { id: vacunaId } })
-  if (!vacuna || vacuna.mascotaId !== mascotaId) notFound()
-  return <EditarVacunaForm vacuna={vacuna} mascotaId={mascotaId} />
-}
+  await requirePermisoPagina("controles", "editar")
+  
+  const { id: fichaId, vacunaId } = await params
+  
+  const vacuna = await prisma.controlPreventivo.findUnique({ 
+    where: { id: vacunaId } 
+  })
+  
+  if (!vacuna || vacuna.fichaId !== fichaId) notFound()
+    
+  return <EditarVacunaForm vacuna={vacuna} mascotaId={fichaId} />
+};

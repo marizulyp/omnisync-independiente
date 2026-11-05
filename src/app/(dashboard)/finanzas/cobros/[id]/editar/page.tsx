@@ -15,11 +15,12 @@ export default async function EditarCobroPage({
     prisma.cobro.findUnique({ where: { id } }),
     prisma.cliente.findMany({
       orderBy: { nombre: "asc" },
-      include: { mascotas: { select: { id: true, nombre: true } } },
+      // Cambiamos mascotas por fichas para que coincida con el nuevo esquema
+      include: { fichas: { select: { id: true, nombre: true } } },
     }),
   ])
 
   if (!cobro) notFound()
 
   return <EditarCobroForm cobro={cobro} clientes={clientes} />
-}
+};

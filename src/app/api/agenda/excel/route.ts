@@ -55,8 +55,8 @@ export async function GET(req: NextRequest) {
     where: { fecha: { gte: inicio, lte: fin } },
     orderBy: { fecha: "asc" },
     include: {
-      mascota: { include: { cliente: { select: { nombre: true, telefono: true } } } },
-      veterinario: { select: { nombre: true } },
+      ficha: { include: { cliente: { select: { nombre: true, telefono: true } } } },
+      especialista: { select: { nombre: true } },
     },
   })
 
@@ -70,12 +70,12 @@ export async function GET(req: NextRequest) {
   const filas = citas.map((c) => ({
     Fecha: c.fecha.toLocaleDateString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric" }),
     Hora: c.fecha.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" }),
-    Paciente: c.mascota.nombre,
-    "Dueño": c.mascota.cliente.nombre,
-    Teléfono: c.mascota.cliente.telefono ?? "",
+    Paciente: c.ficha?.nombre ?? "—",
+    "Dueño": c.ficha?.cliente?.nombre ?? "—",
+    Teléfono: c.ficha?.cliente?.telefono ?? "",
     Tipo: TIPO_LABEL[c.tipo] ?? c.tipo,
     Estado: ESTADO_LABEL[c.estado] ?? c.estado,
-    Veterinario: c.veterinario?.nombre ?? "Sin asignar",
+    Profesional: c.especialista?.nombre ?? "Sin asignar",
     Motivo: c.motivo ?? "",
     Notas: c.notas ?? "",
   }))
@@ -101,4 +101,4 @@ export async function GET(req: NextRequest) {
       "Content-Disposition": `attachment; filename="${nombreArchivo}"`,
     },
   })
-}
+};

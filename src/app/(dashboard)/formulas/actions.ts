@@ -7,18 +7,26 @@ import { revalidatePath } from "next/cache"
 
 export type ActionState = { error?: string }
 
-type ItemInput = { medicamento: string; instrucciones: string }
+// Ajustamos el tipado para aceptar tanto la estructura vieja como la nueva
+type ItemInput = { item?: string; medicamento?: string; instrucciones: string }
 
 export async function crearFormula(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  await requirePermiso("formulas", "editar")
-  const mascotaId = formData.get("mascotaId") as string
-  const veterinarioId = (formData.get("veterinarioId") as string) || null
+  // 1. El permiso ahora corresponde al módulo unificado: "recomendaciones"
+  await requirePermiso("recomendaciones", "editar")
+  
+  // 2. Extraemos los campos mapeando a los nuevos nombres de tu base de datos
+  const fichaIdRaw = formData.get("fichaId") || formData.get("mascotaId")
+  const fichaId = fichaIdRaw as string
+  
+  const especialistaIdRaw = formData.get("especialistaId") || formData.get("veterinarioId")
+  const especialistaId = (especialistaIdRaw as string) || null
+  
   const itemsJson = formData.get("itemsJson") as string
 
-  if (!mascotaId) return { error: "Selecciona una mascota" }
+  if (!fichaId) return { error: "Selecciona un paciente / ficha" }
 
   let items: ItemInput[] = []
   try {
@@ -27,34 +35,39 @@ export async function crearFormula(
     return { error: "Error en los medicamentos" }
   }
 
-  const itemsValidos = items.filter((i) => i.medicamento.trim())
-  if (itemsValidos.length === 0) return { error: "Agrega al menos un medicamento" }
+  // Validamos usando 'item' o el antiguo 'medicamento'
+  const itemsValidos = items.filter((i) => (i.item || i.medicamento || "").trim())
+  if (itemsValidos.length === 0) return { error: "Agrega al menos una recomendación o medicamento" }
 
-  let formulaId: string
+  let recomendacionId: string
   try {
-    const formula = await prisma.formulaMedica.create({
-      data: { mascotaId, veterinarioId },
+    // 3. Guardamos en las nuevas tablas
+    const recomendacion = await prisma.recomendacion.create({
+      data: { fichaId, especialistaId },
     })
-    await prisma.formulaMedicaItem.createMany({
-      data: itemsValidos.map((item, i) => ({
-        formulaId: formula.id,
+    
+    await prisma.recomendacionItem.createMany({
+      data: itemsValidos.map((itm, i) => ({
+        recomendacionId: recomendacion.id,
         orden: i,
-        medicamento: item.medicamento.trim(),
-        instrucciones: item.instrucciones.trim(),
+        item: (itm.item || itm.medicamento || "").trim(),
+        instrucciones: (itm.instrucciones || "").trim(),
       })),
     })
-    formulaId = formula.id
-  } catch {
+    
+    recomendacionId = recomendacion.id
+  } catch (error) {
+    console.error("Error al crear recomendación:", error)
     return { error: "Error al guardar la fórmula médica" }
   }
 
   revalidatePath("/formulas")
-  redirect(`/formulas/${formulaId}`)
+  redirect(`/formulas/${recomendacionId}`)
 }
 
 export async function eliminarFormula(id: string) {
-  await requirePermiso("formulas", "eliminar")
-  await prisma.formulaMedica.delete({ where: { id } })
+  await requirePermiso("recomendaciones", "eliminar")
+  await prisma.recomendacion.delete({ where: { id } })
   revalidatePath("/formulas")
   redirect("/formulas")
-}
+};

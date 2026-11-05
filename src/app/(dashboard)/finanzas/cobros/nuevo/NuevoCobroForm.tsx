@@ -5,8 +5,8 @@ import { crearCobro } from "../../actions"
 import { SelectField } from "@/components/ui/SelectField"
 import { fechaLocalISO } from "@/lib/fechas"
 
-type MascotaOpt = { id: string; nombre: string }
-type ClienteOpt = { id: string; nombre: string; mascotas: MascotaOpt[] }
+type FichaOpt = { id: string; nombre: string }
+type ClienteOpt = { id: string; nombre: string; fichas: FichaOpt[] }
 
 function hoyISO() {
   return fechaLocalISO()
@@ -16,7 +16,7 @@ export function NuevoCobroForm({ clientes }: { clientes: ClienteOpt[] }) {
   const [state, formAction, pending] = useActionState(crearCobro, {})
   const [clienteId, setClienteId] = useState("")
 
-  const mascotas = clientes.find((c) => c.id === clienteId)?.mascotas ?? []
+  const fichas = clientes.find((c) => c.id === clienteId)?.fichas ?? []
 
   return (
     <div className="sm:p-6 max-w-lg mx-auto">
@@ -114,15 +114,15 @@ export function NuevoCobroForm({ clientes }: { clientes: ClienteOpt[] }) {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Mascota</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Ficha / Paciente</label>
             <SelectField
               key={clienteId}
-              name="mascotaId"
+              name="fichaId"
               defaultValue=""
               disabled={!clienteId}
               options={[
                 { value: "", label: "Sin asociar" },
-                ...mascotas.map((m) => ({ value: m.id, label: m.nombre })),
+                ...fichas.map((f) => ({ value: f.id, label: f.nombre })),
               ]}
             />
           </div>
@@ -155,4 +155,4 @@ export function NuevoCobroForm({ clientes }: { clientes: ClienteOpt[] }) {
       </form>
     </div>
   )
-}
+};

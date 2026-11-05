@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
     prisma.cobro.findMany({
       where: { fecha: rango },
       orderBy: { fecha: "asc" },
-      include: { cliente: { select: { nombre: true } }, mascota: { select: { nombre: true } } },
+      include: { cliente: { select: { nombre: true } }, ficha: { select: { nombre: true } } },
     }),
     prisma.egreso.findMany({
       where: { fecha: rango },
@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
       numero: `ING-${String(c.numero).padStart(4, "0")}`,
       concepto: c.concepto,
       cliente: c.cliente?.nombre ?? "Consumidor final",
-      referencia: c.mascota?.nombre ?? "",
+      referencia: c.ficha?.nombre ?? "",
       metodo: c.metodoPago,
       monto: c.monto,
       saldo: 0,
@@ -168,4 +168,4 @@ export async function GET(req: NextRequest) {
       "Content-Disposition": `attachment; filename="${nombreArchivo}"`,
     },
   })
-}
+};

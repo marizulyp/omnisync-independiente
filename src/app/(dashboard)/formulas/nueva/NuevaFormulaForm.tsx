@@ -6,47 +6,46 @@ import Link from "next/link"
 import { crearFormula } from "../actions"
 import { SelectField } from "@/components/ui/SelectField"
 
-type ItemFila = { uid: string; medicamento: string; instrucciones: string }
-type MascotaOpt = {
+type ItemFila = { uid: string; item: string; instrucciones: string }
+type FichaOpt = {
   id: string
   nombre: string
-  especie: string
-  raza: string | null
-  fechaNacimiento: Date | null
-  peso: number | null
+  tipo: string
+  datosGenerales: any
   cliente: { nombre: string }
 }
-type VetOpt = { id: string; nombre: string }
+type EspecialistaOpt = { id: string; nombre: string }
 
 let _uid = 0
 function uid() { return String(++_uid) }
 
 export function NuevaFormulaForm({
-  mascotas,
-  veterinarios,
+  fichas,
+  especialistas,
 }: {
-  mascotas: MascotaOpt[]
-  veterinarios: VetOpt[]
+  fichas: FichaOpt[]
+  especialistas: EspecialistaOpt[]
 }) {
   const [state, formAction, pending] = useActionState(crearFormula, {})
-  const [mascotaId, setMascotaId] = useState("")
+  const [fichaId, setFichaId] = useState("")
   const [items, setItems] = useState<ItemFila[]>([
-    { uid: uid(), medicamento: "", instrucciones: "" },
+    { uid: uid(), item: "", instrucciones: "" },
   ])
 
-  const mascotaSeleccionada = mascotas.find((m) => m.id === mascotaId)
+  const fichaSeleccionada = fichas.find((f) => f.id === fichaId)
 
   function addItem() {
-    setItems((prev) => [...prev, { uid: uid(), medicamento: "", instrucciones: "" }])
+    setItems((prev) => [...prev, { uid: uid(), item: "", instrucciones: "" }])
   }
   function removeItem(id: string) {
     if (items.length > 1) setItems((prev) => prev.filter((i) => i.uid !== id))
   }
-  function updateItem(id: string, field: "medicamento" | "instrucciones", value: string) {
+  function updateItem(id: string, field: "item" | "instrucciones", value: string) {
     setItems((prev) => prev.map((i) => i.uid === id ? { ...i, [field]: value } : i))
   }
 
-  const itemsData = items.map((i) => ({ medicamento: i.medicamento, instrucciones: i.instrucciones }))
+  // Empaquetamos los datos enviando 'item' en el JSON que procesará el Server Action
+  const itemsData = items.map((i) => ({ item: i.item, instrucciones: i.instrucciones }))
 
   const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"]
 
@@ -56,7 +55,7 @@ export function NuevaFormulaForm({
         <Link href="/formulas" className="text-sm text-gray-500 hover:text-gray-700">
           ← Volver a fórmulas
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900 mt-2">Nueva fórmula médica</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mt-2">Nueva recomendación médica</h1>
       </div>
 
       <form action={formAction} className="space-y-5">
@@ -74,47 +73,48 @@ export function NuevaFormulaForm({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mascota <span className="text-red-500">*</span>
+              Paciente / Ficha <span className="text-red-500">*</span>
             </label>
             <SelectField
-              name="mascotaId"
-              value={mascotaId}
-              onChange={(val) => setMascotaId(val)}
+              name="fichaId"
+              value={fichaId}
+              onChange={(val) => setFichaId(val)}
               required
-              placeholder="Selecciona una mascota"
-              options={mascotas.map((m) => ({ value: m.id, label: `${m.nombre} — ${m.cliente.nombre}` }))}
+              placeholder="Selecciona un paciente"
+              options={fichas.map((f) => ({ value: f.id, label: `${f.nombre} — ${f.cliente.nombre}` }))}
             />
           </div>
 
-          {mascotaSeleccionada && (
+          {fichaSeleccionada && (
             <div className="grid grid-cols-3 gap-3 text-sm bg-gray-50 rounded-lg px-4 py-3">
               <div>
                 <p className="text-xs text-gray-400 uppercase">Especie / Raza</p>
                 <p className="font-medium text-gray-800 capitalize">
-                  {mascotaSeleccionada.especie}{mascotaSeleccionada.raza ? ` · ${mascotaSeleccionada.raza}` : ""}
+                  {fichaSeleccionada.datosGenerales?.especie || fichaSeleccionada.tipo}
+                  {fichaSeleccionada.datosGenerales?.raza ? ` · ${fichaSeleccionada.datosGenerales.raza}` : ""}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-gray-400 uppercase">Peso</p>
                 <p className="font-medium text-gray-800">
-                  {mascotaSeleccionada.peso ? `${mascotaSeleccionada.peso} kg` : "—"}
+                  {fichaSeleccionada.datosGenerales?.peso ? `${fichaSeleccionada.datosGenerales.peso} kg` : "—"}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-gray-400 uppercase">Propietario</p>
-                <p className="font-medium text-gray-800">{mascotaSeleccionada.cliente.nombre}</p>
+                <p className="font-medium text-gray-800">{fichaSeleccionada.cliente.nombre}</p>
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Veterinario</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Especialista / Veterinario</label>
             <SelectField
-              name="veterinarioId"
+              name="especialistaId"
               defaultValue=""
               options={[
                 { value: "", label: "Sin asignar" },
-                ...veterinarios.map((v) => ({ value: v.id, label: v.nombre })),
+                ...especialistas.map((e) => ({ value: e.id, label: e.nombre })),
               ]}
             />
           </div>
@@ -122,7 +122,7 @@ export function NuevaFormulaForm({
 
         {/* Medicamentos */}
         <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
-          <h2 className="font-semibold text-gray-800 text-sm uppercase tracking-wide">Medicamentos prescritos</h2>
+          <h2 className="font-semibold text-gray-800 text-sm uppercase tracking-wide">Recomendaciones y/o Medicamentos</h2>
 
           {items.map((item, idx) => (
             <div key={item.uid} className="border border-gray-200 rounded-lg p-4 space-y-3 relative">
@@ -142,12 +142,12 @@ export function NuevaFormulaForm({
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Medicamento <span className="text-red-500">*</span>
+                  Recomendación o Medicamento <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  value={item.medicamento}
-                  onChange={(e) => updateItem(item.uid, "medicamento", e.target.value)}
+                  value={item.item}
+                  onChange={(e) => updateItem(item.uid, "item", e.target.value)}
                   placeholder="Ej: Antax suspensión · Farmacia uso humano"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A6E]"
                 />
@@ -171,7 +171,7 @@ export function NuevaFormulaForm({
               onClick={addItem}
               className="text-sm text-[#1E3A6E] hover:text-[#162D57] font-medium"
             >
-              + Agregar medicamento
+              + Agregar recomendación
             </button>
           )}
         </div>
@@ -182,7 +182,7 @@ export function NuevaFormulaForm({
             disabled={pending}
             className="bg-[#1E3A6E] text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-[#162D57] disabled:opacity-50 transition-colors"
           >
-            {pending ? "Guardando..." : "Crear fórmula"}
+            {pending ? "Guardando..." : "Crear recomendación"}
           </button>
           <Link
             href="/formulas"
@@ -194,4 +194,4 @@ export function NuevaFormulaForm({
       </form>
     </div>
   )
-}
+};

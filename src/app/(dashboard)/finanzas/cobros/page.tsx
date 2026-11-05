@@ -40,7 +40,8 @@ export default async function CobrosPage({
         }
       : undefined,
     orderBy: { fecha: "desc" },
-    include: { cliente: { select: { nombre: true } }, mascota: { select: { nombre: true } } },
+    // Cambiamos "mascota" por "ficha" en la consulta
+    include: { cliente: { select: { nombre: true } }, ficha: { select: { nombre: true } } },
   })
 
   const total = cobros.reduce((acc, c) => acc + c.monto, 0)
@@ -63,7 +64,7 @@ export default async function CobrosPage({
         {puedeEditar && (
           <div className="flex flex-wrap gap-2">
           <Link
-            href="/finanzas/cobros/nuevo"
+            href="/finanzas/cobros/nueva"
             className="bg-white border border-[#E2E8F0] text-[#334155] px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#F8FAFC] transition-colors"
           >
             + Registrar ingreso
@@ -108,7 +109,7 @@ export default async function CobrosPage({
                 <th className="text-left px-4 py-3 font-semibold text-gray-600">N°</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-600">Fecha</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-600">Concepto</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 hidden md:table-cell">Cliente / Mascota</th>
+                <th className="text-left px-4 py-3 font-semibold text-gray-600 hidden md:table-cell">Cliente / Paciente</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-600">Método</th>
                 <th className="text-right px-4 py-3 font-semibold text-gray-600">Monto</th>
                 <th className="px-4 py-3"></th>
@@ -124,7 +125,8 @@ export default async function CobrosPage({
                   <td className="px-4 py-3 font-medium text-gray-900">{c.concepto}</td>
                   <td className="px-4 py-3 text-gray-600 hidden md:table-cell">
                     {c.cliente?.nombre ?? "—"}
-                    {c.mascota && <span className="text-gray-400"> · {c.mascota.nombre}</span>}
+                    {/* Imprimimos el nombre desde la ficha en lugar de mascota */}
+                    {c.ficha && <span className="text-gray-400"> · {c.ficha.nombre}</span>}
                   </td>
                   <td className="px-4 py-3 text-gray-600">{METODO_LABEL[c.metodoPago]}</td>
                   <td className="px-4 py-3 text-right font-medium text-green-600">{fmtCOP(c.monto)}</td>
@@ -151,4 +153,4 @@ export default async function CobrosPage({
       )}
     </div>
   )
-}
+};

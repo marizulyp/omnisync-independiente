@@ -13,47 +13,56 @@ export async function GET() {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: "No autorizado" }, { status: 401 })
 
-  const mascotas = await prisma.mascota.findMany({
+  const fichas = await prisma.ficha.findMany({
     orderBy: { nombre: "asc" },
     include: {
       cliente: { select: { nombre: true, telefono: true, email: true } },
-      consultas: { orderBy: { fecha: "desc" }, take: 1, select: { fecha: true } },
-      vacunas: { orderBy: { fecha: "desc" }, take: 1, select: { fecha: true, nombre: true } },
+      atenciones: { orderBy: { fecha: "desc" }, take: 1, select: { fecha: true } },
     },
   })
 
-  const filas = mascotas.map((m) => {
+  const filas = fichas.map((f) => {
+    // Manejamos datosGenerales como un registro tipado sin forzar any
+    const datos = f.datosGenerales && typeof f.datosGenerales === 'object' && !Array.isArray(f.datosGenerales)
+      ? (f.datosGenerales as Record<string, any>) 
+      : {}
+
     let edad = "—"
-    if (m.fechaNacimiento) {
-      const hoy = new Date()
-      let años = hoy.getFullYear() - m.fechaNacimiento.getFullYear()
-      const meses = hoy.getMonth() - m.fechaNacimiento.getMonth()
-      if (meses < 0 || (meses === 0 && hoy.getDate() < m.fechaNacimiento.getDate())) años--
-      if (años === 0) {
-        const m2 = meses < 0 ? 12 + meses : meses
-        edad = `${m2} ${m2 === 1 ? "mes" : "meses"}`
-      } else {
-        edad = `${años} ${años === 1 ? "año" : "años"}`
+    let fechaNacimientoStr = ""
+    
+    if (datos.fechaNacimiento) {
+      const fechaNacimiento = new Date(datos.fechaNacimiento)
+      if (!isNaN(fechaNacimiento.getTime())) {
+        fechaNacimientoStr = fechaNacimiento.toLocaleDateString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric" })
+        
+        const hoy = new Date()
+        let años = hoy.getFullYear() - fechaNacimiento.getFullYear()
+        const meses = hoy.getMonth() - fechaNacimiento.getMonth()
+        if (meses < 0 || (meses === 0 && hoy.getDate() < fechaNacimiento.getDate())) años--
+        
+        if (años === 0) {
+          const m2 = meses < 0 ? 12 + meses : meses
+          edad = `${m2} ${m2 === 1 ? "mes" : "meses"}`
+        } else {
+          edad = `${años} ${años === 1 ? "año" : "años"}`
+        }
       }
     }
+
     return {
-      Nombre: m.nombre,
-      Especie: ESPECIE_LABEL[m.especie] ?? m.especie,
-      Raza: m.raza ?? "",
+      Nombre: f.nombre,
+      Tipo: ESPECIE_LABEL[f.tipo] ?? f.tipo,
+      Raza: datos.raza ?? "",
       Edad: edad,
-      "Fecha nacimiento": m.fechaNacimiento
-        ? m.fechaNacimiento.toLocaleDateString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric" })
-        : "",
-      "Dueño": m.cliente.nombre,
-      "Tel. dueño": m.cliente.telefono ?? "",
-      "Email dueño": m.cliente.email ?? "",
-      "Última consulta": m.consultas[0]?.fecha
-        ? m.consultas[0].fecha.toLocaleDateString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric" })
-        : "Sin consultas",
-      "Última vacuna": m.vacunas[0]?.nombre ?? "Sin vacunas",
-      "Fecha última vacuna": m.vacunas[0]?.fecha
-        ? m.vacunas[0].fecha.toLocaleDateString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric" })
-        : "",
+      "Fecha nacimiento": fechaNacimientoStr,
+      "Dueño": f.cliente.nombre,
+      "Tel. dueño": f.cliente.telefono ?? "",
+      "Email dueño": f.cliente.email ?? "",
+      "Última atención": f.atenciones[0]?.fecha
+        ? f.atenciones[0].fecha.toLocaleDateString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric" })
+        : "Sin atenciones",
+      "Última vacuna": "—",
+      "Fecha última vacuna": "",
     }
   })
 
@@ -78,4 +87,4 @@ export async function GET() {
       "Content-Disposition": `attachment; filename="${nombreArchivo}"`,
     },
   })
-}
+};

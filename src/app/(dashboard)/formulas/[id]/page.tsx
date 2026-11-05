@@ -16,7 +16,7 @@ const BORDER = "#E2E8F0"
 function normalizar(str: string) {
   return str
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-zA-Z0-9\s]/g, "")
     .trim()
     .replace(/\s+/g, "_")
@@ -28,28 +28,31 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const formula = await prisma.formulaMedica.findUnique({
+  const recomendacion = await prisma.recomendacion.findUnique({
     where: { id },
     select: {
       fecha: true,
       creadoEn: true,
-      mascota: { select: { nombre: true, cliente: { select: { nombre: true } } } },
+      ficha: { select: { nombre: true, cliente: { select: { nombre: true } } } },
     },
   })
-  if (!formula) return { title: "Formula_Medica" }
+  if (!recomendacion || !recomendacion.ficha) return { title: "Formula_Medica" }
 
-  const mascota = normalizar(formula.mascota.nombre)
-  const apellido = normalizar(formula.mascota.cliente.nombre.split(" ").slice(-1)[0])
-  const f = formula.fecha
+  const paciente = normalizar(recomendacion.ficha.nombre)
+  const apellido = normalizar(recomendacion.ficha.cliente.nombre.split(" ").slice(-1)[0])
+  const f = recomendacion.fecha
   const fecha = `${String(f.getDate()).padStart(2, "0")}${String(f.getMonth() + 1).padStart(2, "0")}${f.getFullYear()}`
-  const col = new Date(formula.creadoEn.getTime() - 5 * 60 * 60 * 1000)
+  const col = new Date(recomendacion.creadoEn.getTime() - 5 * 60 * 60 * 1000)
   const hora = `${String(col.getUTCHours()).padStart(2, "0")}${String(col.getUTCMinutes()).padStart(2, "0")}`
 
-  return { title: `Formula_Medica_${mascota}_${apellido}_${fecha}_${hora}` }
+  return { title: `Formula_Medica_${paciente}_${apellido}_${fecha}_${hora}` }
 }
 
-function calcularEdad(fechaNacimiento: Date | null): string {
-  if (!fechaNacimiento) return "—"
+function calcularEdad(fechaNacimientoStr: string | null | undefined): string {
+  if (!fechaNacimientoStr) return "—"
+  const fechaNacimiento = new Date(fechaNacimientoStr)
+  if (isNaN(fechaNacimiento.getTime())) return "—"
+  
   const hoy = new Date()
   const totalMeses =
     (hoy.getFullYear() - fechaNacimiento.getFullYear()) * 12 +
@@ -75,21 +78,26 @@ export default async function FormulaDetallePage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const formula = await prisma.formulaMedica.findUnique({
+  const recomendacion = await prisma.recomendacion.findUnique({
     where: { id },
     include: {
-      mascota: { include: { cliente: true } },
-      veterinario: { select: { nombre: true } },
+      ficha: { include: { cliente: true } },
+      especialista: { select: { nombre: true } },
       items: { orderBy: { orden: "asc" } },
     },
   })
 
-  if (!formula) notFound()
+  if (!recomendacion || !recomendacion.ficha) notFound()
 
-  const { mascota } = formula
-  const edad = calcularEdad(mascota.fechaNacimiento)
-  const fecha = localDate(formula.fecha)
-  const hcNum = mascota.id.slice(-6).toUpperCase()
+  const { ficha } = recomendacion
+  const datosGenerales = (ficha.datosGenerales as any) || {}
+  
+  const edad = calcularEdad(datosGenerales.fechaNacimiento)
+  const fecha = localDate(recomendacion.fecha)
+  const hcNum = ficha.id.slice(-6).toUpperCase()
+  const especie = datosGenerales.especie || ficha.tipo
+  const raza = datosGenerales.raza || ""
+  const peso = datosGenerales.peso || ""
 
   return (
     <>
@@ -168,27 +176,22 @@ export default async function FormulaDetallePage({
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 6 }}>
             {/* Logo */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={CLINICA.logo} alt={CLINICA.nombre} style={{  width: 200, height: 150 }} />
+            <img src={(CLINICA as any).logo || ""} alt={CLINICA.nombre} style={{ width: 200, height: 150, objectFit: "contain" }} />
 
             {/* Datos empresa */}
             <div style={{ textAlign: "right" }}>
               <p style={{ fontSize: 14, fontWeight: 700, color: DARK, marginBottom: 2 }}>{CLINICA.razonSocial}</p>
               <p style={{ fontSize: 11, color: MUTED }}>{CLINICA.nit}</p>
               <p style={{ fontSize: 11, color: TEAL }}>{CLINICA.direccion}</p>
-              <p style={{ fontSize: 11, color: TEAL }}>{CLINICA.telefono} · {CLINICA.celular}</p>
+              <p style={{ fontSize: 11, color: TEAL }}>{CLINICA.telefono} · {(CLINICA as any).celular || ""}</p>
               <p style={{ fontSize: 9, fontWeight: 600, color: TEAL, textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 6 }}>
                 Fórmula Médica Veterinaria
               </p>
             </div>
           </div>
 
-          {/* Subtítulo */}
-          <p style={{ fontSize: 9.5, fontWeight: 600, color: LIGHT, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
-            {CLINICA.subtitulo}
-          </p>
-
           {/* Línea divisora */}
-          <div style={{ height: 1.5, background: DARK, marginBottom: 18 }} />
+          <div style={{ height: 1.5, background: DARK, marginBottom: 18, marginTop: 10 }} />
 
           {/* ── Cajas: NIT / Número / Fecha ─────────────────────────── */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 18 }}>
@@ -217,13 +220,13 @@ export default async function FormulaDetallePage({
                 Paciente
               </p>
               <p style={{ fontSize: 16, fontWeight: 700, color: DARK, marginBottom: 10 }}>
-                {mascota.nombre} {mascota.cliente.nombre.split(" ").slice(-1)[0]}
+                {ficha.nombre} {ficha.cliente.nombre.split(" ").slice(-1)[0]}
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 <div style={{ display: "flex", gap: 8 }}>
                   <span style={{ fontSize: 10, color: LIGHT, minWidth: 60 }}>Especie</span>
                   <span style={{ fontSize: 11, color: GRAY, textTransform: "capitalize" }}>
-                    {mascota.raza ? `${mascota.raza} · ${mascota.especie}` : mascota.especie}
+                    {raza ? `${raza} · ${especie}` : especie}
                   </span>
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
@@ -232,7 +235,7 @@ export default async function FormulaDetallePage({
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
                   <span style={{ fontSize: 10, color: LIGHT, minWidth: 60 }}>Peso</span>
-                  <span style={{ fontSize: 11, color: GRAY }}>{mascota.peso ? `${mascota.peso} kg` : "—"}</span>
+                  <span style={{ fontSize: 11, color: GRAY }}>{peso ? `${peso} kg` : "—"}</span>
                 </div>
               </div>
             </div>
@@ -243,16 +246,16 @@ export default async function FormulaDetallePage({
                 Propietario
               </p>
               <p style={{ fontSize: 16, fontWeight: 700, color: DARK, marginBottom: 10 }}>
-                {mascota.cliente.nombre}
+                {ficha.cliente.nombre}
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 <div style={{ display: "flex", gap: 8 }}>
                   <span style={{ fontSize: 10, color: LIGHT, minWidth: 60 }}>Teléfono</span>
-                  <span style={{ fontSize: 11, color: GRAY }}>{mascota.cliente.telefono ?? "—"}</span>
+                  <span style={{ fontSize: 11, color: GRAY }}>{ficha.cliente.telefono ?? "—"}</span>
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
                   <span style={{ fontSize: 10, color: LIGHT, minWidth: 60 }}>Identificación</span>
-                  <span style={{ fontSize: 11, color: GRAY }}>{mascota.cliente.identificacion ?? "—"}</span>
+                  <span style={{ fontSize: 11, color: GRAY }}>{ficha.cliente.identificacion ?? "—"}</span>
                 </div>
               </div>
             </div>
@@ -261,13 +264,13 @@ export default async function FormulaDetallePage({
           {/* ── Línea divisora sección medicamentos ─────────────────── */}
           <div style={{ borderBottom: `1.5px solid ${DARK}`, paddingBottom: 5, marginBottom: 16 }}>
             <p style={{ fontSize: 10, fontWeight: 700, color: DARK, textTransform: "uppercase", letterSpacing: "0.07em" }}>
-              Medicamentos prescritos
+              Recomendaciones y/o Medicamentos
             </p>
           </div>
 
           {/* ── Medicamentos ─────────────────────────────────────────── */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16, minHeight: 200, marginBottom: 28 }}>
-            {formula.items.map((item, idx) => (
+            {recomendacion.items.map((item, idx) => (
               <div key={item.id} style={{ display: "flex", gap: 14, breakInside: "avoid" as const }}>
                 {/* Número romano */}
                 <div style={{ flexShrink: 0 }}>
@@ -291,7 +294,7 @@ export default async function FormulaDetallePage({
                 {/* Contenido */}
                 <div style={{ flex: 1, borderBottom: `1px solid ${BORDER}`, paddingBottom: 12 }}>
                   <p style={{ fontSize: 14, fontWeight: 700, color: DARK, margin: 0, lineHeight: 1.3 }}>
-                    {item.medicamento}
+                    {item.item}
                   </p>
                   {item.instrucciones && (
                     <p style={{ fontSize: 12, color: GRAY, margin: "4px 0 0", lineHeight: 1.6, whiteSpace: "pre-line" }}>
@@ -306,14 +309,14 @@ export default async function FormulaDetallePage({
           {/* ── Firma ────────────────────────────────────────────────── */}
           <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 32, breakInside: "avoid" as const }}>
             <div style={{ textAlign: "center", width: 220 }}>
-              {formula.veterinario && (
+              {recomendacion.especialista && (
                 <p style={{ fontSize: 12, fontWeight: 600, color: GRAY, marginBottom: 28 }}>
-                  {formula.veterinario.nombre}
+                  {recomendacion.especialista.nombre}
                 </p>
               )}
               <div style={{ borderBottom: `1.5px solid ${DARK}`, marginBottom: 5 }} />
               <p style={{ fontSize: 9.5, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>
-                Firma del Veterinario
+                Firma del Profesional
               </p>
             </div>
           </div>
@@ -324,7 +327,7 @@ export default async function FormulaDetallePage({
               Documento clínico confidencial · Uso exclusivo del propietario y del equipo veterinario.
             </p>
             <p style={{ fontSize: 9, color: LIGHT, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              {mascota.nombre.toUpperCase()} · {fecha.dia}/{fecha.mes}/{fecha.año}
+              {ficha.nombre.toUpperCase()} · {fecha.dia}/{fecha.mes}/{fecha.año}
             </p>
           </div>
 
@@ -332,4 +335,4 @@ export default async function FormulaDetallePage({
       </div>
     </>
   )
-}
+};

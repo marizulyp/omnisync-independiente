@@ -11,8 +11,8 @@ export async function GET() {
   const clientes = await prisma.cliente.findMany({
     orderBy: { nombre: "asc" },
     include: {
-      _count: { select: { mascotas: true } },
-      mascotas: { select: { nombre: true, especie: true }, orderBy: { nombre: "asc" } },
+      _count: { select: { fichas: true } },
+      fichas: { select: { nombre: true, tipo: true }, orderBy: { nombre: "asc" } },
     },
   })
 
@@ -27,9 +27,9 @@ export async function GET() {
     Teléfono: c.telefono ?? "",
     Email: c.email ?? "",
     Dirección: c.direccion ?? "",
-    "N° mascotas": c._count.mascotas,
-    Mascotas: c.mascotas
-      .map((m) => `${m.nombre} (${ESPECIE_LABEL[m.especie] ?? m.especie})`)
+    "N° pacientes": c._count.fichas,
+    Pacientes: c.fichas
+      .map((f) => `${f.nombre} (${ESPECIE_LABEL[f.tipo] ?? f.tipo})`)
       .join(", "),
     "Registrado el": c.creadoEn
       ? c.creadoEn.toLocaleDateString("es-CO", { day: "2-digit", month: "2-digit", year: "numeric" })
@@ -57,4 +57,4 @@ export async function GET() {
       "Content-Disposition": `attachment; filename="${nombreArchivo}"`,
     },
   })
-}
+};

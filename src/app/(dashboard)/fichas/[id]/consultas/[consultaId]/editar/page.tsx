@@ -8,9 +8,9 @@ export default async function EditarConsultaPage({
 }: {
   params: Promise<{ id: string; consultaId: string }>
 }) {
-  await requirePermisoPagina("consultas", "editar")
-  const { id: mascotaId, consultaId } = await params
-  const consulta = await prisma.consulta.findUnique({ where: { id: consultaId } })
-  if (!consulta || consulta.mascotaId !== mascotaId) notFound()
-  return <EditarConsultaForm consulta={consulta} mascotaId={mascotaId} />
+  await requirePermisoPagina("atenciones", "editar")
+  const { id: fichaId, consultaId } = await params
+  const consulta = await prisma.atencion.findUnique({ where: { id: consultaId } })
+  if (!consulta || consulta.fichaId !== fichaId) notFound()
+  return <EditarConsultaForm consulta={consulta as any} mascotaId={fichaId} />
 }

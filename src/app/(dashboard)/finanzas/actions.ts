@@ -41,7 +41,12 @@ export async function crearCobro(
   if (!monto || monto <= 0) return { error: "El monto debe ser mayor a cero" }
 
   const clienteId = (formData.get("clienteId") as string) || null
-  const mascotaId = (formData.get("mascotaId") as string) || null
+  
+  // Modificado: Se asume que el formulario (cliente) enviará 'fichaId' o 'mascotaId' 
+  // pero lo mapeamos a la variable fichaId para pasarlo a Prisma.
+  const fichaIdRaw = (formData.get("fichaId") || formData.get("mascotaId")) as string
+  const fichaId = fichaIdRaw || null
+  
   const fechaStr = (formData.get("fecha") as string)?.trim()
 
   try {
@@ -52,12 +57,13 @@ export async function crearCobro(
         metodoPago: toMetodoPago(formData.get("metodoPago")),
         fecha: fechaStr ? parseFechaLocal(fechaStr) : new Date(),
         clienteId,
-        mascotaId,
+        fichaId, // Modificado: Usamos fichaId en lugar de mascotaId
         usuarioId: await getUsuarioId(),
         notas: (formData.get("notas") as string)?.trim() || null,
       },
     })
-  } catch {
+  } catch (error) {
+    console.error("Error crearCobro:", error)
     return { error: "Error al registrar el cobro" }
   }
   await registrarActividad({
@@ -84,7 +90,11 @@ export async function actualizarCobro(
   if (!monto || monto <= 0) return { error: "El monto debe ser mayor a cero" }
 
   const clienteId = (formData.get("clienteId") as string) || null
-  const mascotaId = (formData.get("mascotaId") as string) || null
+  
+  // Modificado: Extraemos de igual manera para ser retrocompatibles con el formulario
+  const fichaIdRaw = (formData.get("fichaId") || formData.get("mascotaId")) as string
+  const fichaId = fichaIdRaw || null
+
   const fechaStr = (formData.get("fecha") as string)?.trim()
 
   try {
@@ -96,11 +106,12 @@ export async function actualizarCobro(
         metodoPago: toMetodoPago(formData.get("metodoPago")),
         fecha: fechaStr ? parseFechaLocal(fechaStr) : undefined,
         clienteId,
-        mascotaId,
+        fichaId, // Modificado: Usamos fichaId en lugar de mascotaId
         notas: (formData.get("notas") as string)?.trim() || null,
       },
     })
-  } catch {
+  } catch (error) {
+    console.error("Error actualizarCobro:", error)
     return { error: "Error al actualizar el cobro" }
   }
   await registrarActividad({
@@ -220,4 +231,4 @@ export async function eliminarEgreso(id: string) {
   })
   revalidatePath("/finanzas")
   redirect("/finanzas/egresos?toast=deleted")
-}
+};

@@ -8,12 +8,19 @@ export default async function EditarMascotaPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  await requirePermisoPagina("mascotas", "editar")
+  // 1. Validamos permisos usando el módulo real: "fichas"
+  await requirePermisoPagina("fichas", "editar")
+  
   const { id } = await params
-  const [mascota, clientes] = await Promise.all([
-    prisma.mascota.findUnique({ where: { id } }),
+  
+  // 2. Buscamos en la tabla ficha y obtenemos los clientes simultáneamente
+  const [ficha, clientes] = await Promise.all([
+    prisma.ficha.findUnique({ where: { id } }),
     prisma.cliente.findMany({ orderBy: { nombre: "asc" }, select: { id: true, nombre: true } }),
   ])
-  if (!mascota) notFound()
-  return <EditarMascotaForm mascota={mascota} clientes={clientes} />
-}
+  
+  if (!ficha) notFound()
+    
+  // 3. Pasamos la ficha al formulario que actualizamos en el paso anterior
+  return <EditarMascotaForm ficha={ficha} clientes={clientes} />
+};

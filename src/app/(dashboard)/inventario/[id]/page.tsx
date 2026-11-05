@@ -4,17 +4,9 @@ import { prisma } from "@/lib/prisma"
 import { BtnEliminar } from "@/components/ui/BtnEliminar"
 import { eliminarProducto } from "../actions"
 import { RegistrarMovimientoForm } from "./RegistrarMovimientoForm"
-import type { CategoriaProducto, TipoMovimiento } from "@/generated/prisma/client"
+import type { TipoMovimiento } from "@/generated/prisma/client"
 import { rolActual } from "@/lib/permisos-server"
 import { tienePermiso } from "@/lib/permisos"
-
-const CATEGORIA_LABEL: Record<CategoriaProducto, string> = {
-  medicamento: "Medicamento",
-  alimento: "Alimento",
-  accesorio: "Accesorio",
-  higiene: "Higiene",
-  otro: "Otro",
-}
 
 const TIPO_LABEL: Record<TipoMovimiento, string> = {
   entrada: "Entrada",
@@ -62,7 +54,8 @@ export default async function ProductoDetallePage({
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{producto.nombre}</h1>
-          <p className="text-sm text-gray-500">{CATEGORIA_LABEL[producto.categoria]}</p>
+          {/* La categoría ahora se imprime directamente al ser un String libre */}
+          <p className="text-sm text-gray-500">{producto.categoria}</p>
         </div>
         <div className="flex items-center gap-2">
           {puedeEditar && (
@@ -155,4 +148,4 @@ export default async function ProductoDetallePage({
       </div>
     </div>
   )
-}
+};

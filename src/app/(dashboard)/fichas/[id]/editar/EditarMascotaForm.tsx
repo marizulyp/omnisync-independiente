@@ -2,7 +2,7 @@
 import { useActionState } from "react"
 import Link from "next/link"
 import { actualizarMascota } from "../../actions"
-import type { Mascota } from "@/generated/prisma/client"
+import type { Ficha } from "@/generated/prisma/client"
 import { SelectField } from "@/components/ui/SelectField"
 import { fechaLocalISO } from "@/lib/fechas"
 
@@ -15,31 +15,36 @@ const ESPECIES = [
   { value: "otro", label: "Otro" },
 ]
 
-function toDateInputValue(date: Date | null): string {
-  if (!date) return ""
-  return fechaLocalISO(date)
+function toDateInputValue(dateStr: string | null | undefined): string {
+  if (!dateStr) return ""
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return ""
+  return fechaLocalISO(d)
 }
 
 export function EditarMascotaForm({
-  mascota,
+  ficha,
   clientes,
 }: {
-  mascota: Mascota
+  ficha: Ficha
   clientes: { id: string; nombre: string }[]
 }) {
   const [state, action, pending] = useActionState(actualizarMascota, {})
 
+  // Extraemos los datos específicos de la mascota desde el JSON
+  const datos = (ficha.datosGenerales as any) || {}
+
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <div className="mb-6">
-        <Link href={`/mascotas/${mascota.id}`} className="text-sm text-gray-500 hover:text-gray-700">
-          ← Volver a la mascota
+        <Link href={`/fichas/${ficha.id}`} className="text-sm text-gray-500 hover:text-gray-700">
+          ← Volver a la ficha
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900 mt-2">Editar mascota</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mt-2">Editar paciente</h1>
       </div>
 
       <form action={action} className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-        <input type="hidden" name="id" value={mascota.id} />
+        <input type="hidden" name="id" value={ficha.id} />
 
         {state.error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
@@ -56,7 +61,7 @@ export function EditarMascotaForm({
               name="nombre"
               type="text"
               required
-              defaultValue={mascota.nombre}
+              defaultValue={ficha.nombre}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A6E]"
             />
           </div>
@@ -65,7 +70,7 @@ export function EditarMascotaForm({
             <label className="block text-sm font-medium text-gray-700 mb-1">Especie</label>
             <SelectField
               name="especie"
-              defaultValue={mascota.especie}
+              defaultValue={datos.especie || "otro"}
               options={ESPECIES}
             />
           </div>
@@ -75,7 +80,7 @@ export function EditarMascotaForm({
             <input
               name="raza"
               type="text"
-              defaultValue={mascota.raza ?? ""}
+              defaultValue={datos.raza ?? ""}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A6E]"
             />
           </div>
@@ -87,7 +92,7 @@ export function EditarMascotaForm({
               type="number"
               step="0.1"
               min="0"
-              defaultValue={mascota.peso ?? ""}
+              defaultValue={datos.peso ?? ""}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A6E]"
             />
           </div>
@@ -97,7 +102,7 @@ export function EditarMascotaForm({
             <input
               name="fechaNacimiento"
               type="date"
-              defaultValue={toDateInputValue(mascota.fechaNacimiento)}
+              defaultValue={toDateInputValue(datos.fechaNacimiento)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A6E]"
             />
           </div>
@@ -106,7 +111,7 @@ export function EditarMascotaForm({
             <label className="block text-sm font-medium text-gray-700 mb-1">Cliente dueño</label>
             <SelectField
               name="clienteId"
-              defaultValue={mascota.clienteId}
+              defaultValue={ficha.clienteId}
               options={clientes.map((c) => ({ value: c.id, label: c.nombre }))}
             />
           </div>
@@ -116,7 +121,7 @@ export function EditarMascotaForm({
             <textarea
               name="notas"
               rows={3}
-              defaultValue={mascota.notas ?? ""}
+              defaultValue={ficha.notas ?? ""}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A6E] resize-none"
             />
           </div>
@@ -131,7 +136,7 @@ export function EditarMascotaForm({
             {pending ? "Guardando..." : "Guardar cambios"}
           </button>
           <Link
-            href={`/mascotas/${mascota.id}`}
+            href={`/fichas/${ficha.id}`}
             className="px-6 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
           >
             Cancelar
@@ -140,4 +145,4 @@ export function EditarMascotaForm({
       </form>
     </div>
   )
-}
+};

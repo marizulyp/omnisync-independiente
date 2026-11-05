@@ -6,8 +6,8 @@ import type { Cobro } from "@/generated/prisma/client"
 import { SelectField } from "@/components/ui/SelectField"
 import { fechaLocalISO } from "@/lib/fechas"
 
-type MascotaOpt = { id: string; nombre: string }
-type ClienteOpt = { id: string; nombre: string; mascotas: MascotaOpt[] }
+type FichaOpt = { id: string; nombre: string }
+type ClienteOpt = { id: string; nombre: string; fichas: FichaOpt[] }
 
 function toDateInput(date: Date): string {
   return fechaLocalISO(date)
@@ -23,7 +23,7 @@ export function EditarCobroForm({
   const [state, action, pending] = useActionState(actualizarCobro, {})
   const [clienteId, setClienteId] = useState(cobro.clienteId ?? "")
 
-  const mascotas = clientes.find((c) => c.id === clienteId)?.mascotas ?? []
+  const fichas = clientes.find((c) => c.id === clienteId)?.fichas ?? []
 
   return (
     <div className="p-6 max-w-lg mx-auto">
@@ -108,15 +108,15 @@ export function EditarCobroForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Mascota</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Ficha / Paciente</label>
             <SelectField
               key={clienteId}
-              name="mascotaId"
-              defaultValue={cobro.mascotaId ?? ""}
+              name="fichaId"
+              defaultValue={cobro.fichaId ?? ""}
               disabled={!clienteId}
               options={[
                 { value: "", label: "Sin asociar" },
-                ...mascotas.map((m) => ({ value: m.id, label: m.nombre })),
+                ...fichas.map((f) => ({ value: f.id, label: f.nombre })),
               ]}
             />
           </div>
@@ -150,4 +150,4 @@ export function EditarCobroForm({
       </form>
     </div>
   )
-}
+};

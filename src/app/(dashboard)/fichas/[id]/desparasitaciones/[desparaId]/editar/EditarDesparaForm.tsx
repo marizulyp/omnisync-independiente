@@ -2,7 +2,7 @@
 import { useActionState } from "react"
 import Link from "next/link"
 import { actualizarDesparasitacion } from "../../../../../atenciones/actions"
-import type { Desparasitacion } from "@/generated/prisma/client"
+import type { ControlPreventivo } from "@/generated/prisma/client"
 import { SelectField } from "@/components/ui/SelectField"
 import { fechaLocalISO } from "@/lib/fechas"
 
@@ -14,7 +14,7 @@ export function EditarDesparaForm({
   despara,
   mascotaId,
 }: {
-  despara: Desparasitacion
+  despara: ControlPreventivo
   mascotaId: string
 }) {
   const [state, action, pending] = useActionState(actualizarDesparasitacion, {})
@@ -22,14 +22,15 @@ export function EditarDesparaForm({
   return (
     <div className="p-6 max-w-lg mx-auto">
       <div className="mb-6">
-        <Link href={`/mascotas/${mascotaId}`} className="text-sm text-gray-500 hover:text-gray-700">
-          ← Volver a la mascota
+        <Link href={`/fichas/${mascotaId}`} className="text-sm text-gray-500 hover:text-gray-700">
+          ← Volver a la ficha
         </Link>
         <h1 className="text-2xl font-bold text-gray-900 mt-2">Editar desparasitación</h1>
       </div>
 
       <form action={action} className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
         <input type="hidden" name="id" value={despara.id} />
+        {/* Mantenemos el name="mascotaId" para no romper el Server Action que recibe los datos */}
         <input type="hidden" name="mascotaId" value={mascotaId} />
 
         {state.error && (
@@ -61,6 +62,7 @@ export function EditarDesparaForm({
                 { value: "interna", label: "Interna" },
                 { value: "externa", label: "Externa (pulgas/garrapatas)" },
                 { value: "ambas", label: "Ambas" },
+                { value: "Desparasitación", label: "General" }
               ]}
             />
           </div>
@@ -70,7 +72,8 @@ export function EditarDesparaForm({
             <input
               name="producto"
               type="text"
-              defaultValue={despara.producto ?? ""}
+              // Usamos el campo "nombre" del modelo ControlPreventivo
+              defaultValue={despara.nombre ?? ""}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A6E]"
             />
           </div>
@@ -80,7 +83,8 @@ export function EditarDesparaForm({
             <input
               name="proximaDosis"
               type="date"
-              defaultValue={despara.proximaDosis ? toDateInput(despara.proximaDosis) : ""}
+              // Usamos el campo "proximaFecha" del modelo ControlPreventivo
+              defaultValue={despara.proximaFecha ? toDateInput(despara.proximaFecha) : ""}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A6E]"
             />
           </div>
@@ -105,7 +109,7 @@ export function EditarDesparaForm({
             {pending ? "Guardando..." : "Guardar cambios"}
           </button>
           <Link
-            href={`/mascotas/${mascotaId}`}
+            href={`/fichas/${mascotaId}`}
             className="px-6 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
           >
             Cancelar
@@ -114,4 +118,4 @@ export function EditarDesparaForm({
       </form>
     </div>
   )
-}
+};

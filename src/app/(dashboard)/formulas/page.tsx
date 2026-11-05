@@ -8,13 +8,14 @@ import { tienePermiso } from "@/lib/permisos"
 
 export default async function FormulasPage() {
   const rol = await rolActual()
-  const puedeEditar = tienePermiso(rol, "formulas", "editar")
-  const puedeEliminar = tienePermiso(rol, "formulas", "eliminar")
-  const formulas = await prisma.formulaMedica.findMany({
+  const puedeEditar = tienePermiso(rol, "recomendaciones", "editar")
+  const puedeEliminar = tienePermiso(rol, "recomendaciones", "eliminar")
+  
+  const recomendaciones = await prisma.recomendacion.findMany({
     orderBy: { creadoEn: "desc" },
     include: {
-      mascota: { include: { cliente: { select: { nombre: true } } } },
-      veterinario: { select: { nombre: true } },
+      ficha: { include: { cliente: { select: { nombre: true } } } },
+      especialista: { select: { nombre: true } },
       items: { orderBy: { orden: "asc" }, take: 1 },
     },
   })
@@ -24,9 +25,9 @@ export default async function FormulasPage() {
       {/* Encabezado */}
       <div className="flex flex-wrap items-end justify-between gap-4 mb-[18px]">
         <div>
-          <h1 className="text-[22px] font-semibold tracking-[-0.015em] text-[#0F1720]">Fórmulas médicas</h1>
+          <h1 className="text-[22px] font-semibold tracking-[-0.015em] text-[#0F1720]">Fórmulas y Recomendaciones</h1>
           <p className="mt-[5px] font-mono text-[11.5px] tracking-[0.04em] text-[#64748B] uppercase">
-            {formulas.length} {formulas.length === 1 ? "receta" : "recetas"} registrada{formulas.length !== 1 ? "s" : ""}
+            {recomendaciones.length} {recomendaciones.length === 1 ? "receta" : "recetas"} registrada{recomendaciones.length !== 1 ? "s" : ""}
           </p>
         </div>
         {puedeEditar && (
@@ -40,7 +41,7 @@ export default async function FormulasPage() {
         )}
       </div>
 
-      {formulas.length === 0 ? (
+      {recomendaciones.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-[#94A3B8]">
           <Icon name="prescriptions" size={48} className="mb-3 opacity-40" />
           <p className="text-[12.5px]">No hay fórmulas registradas</p>
@@ -65,38 +66,38 @@ export default async function FormulasPage() {
                 <span>Fecha</span>
                 <span>Paciente</span>
                 <span>Propietario</span>
-                <span>Primer medicamento</span>
-                <span>Veterinario</span>
+                <span>Primera recomendación</span>
+                <span>Profesional</span>
                 <span className="text-right">Acciones</span>
               </div>
 
               {/* Filas */}
-              {formulas.map((f) => {
-                const deleteAction = eliminarFormula.bind(null, f.id)
+              {recomendaciones.map((r) => {
+                const deleteAction = eliminarFormula.bind(null, r.id)
                 return (
                   <div
-                    key={f.id}
+                    key={r.id}
                     className="grid gap-3 items-center border-b border-[#F1F5F9] px-[18px] py-[11px] hover:bg-[#F8FAFC] transition-colors last:border-0"
                     style={{ gridTemplateColumns: "110px minmax(0,1fr) minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr) 90px" }}
                   >
                     <span className="font-mono text-[12px] text-[#475569]">
-                      {f.fecha.toLocaleDateString("es-CO", { day: "2-digit", month: "short", year: "2-digit" })}
+                      {r.fecha.toLocaleDateString("es-CO", { day: "2-digit", month: "short", year: "2-digit" })}
                     </span>
                     <span className="truncate text-[13.5px] font-semibold text-[#0F1720]">
-                      {f.mascota.nombre}
+                      {r.ficha?.nombre ?? "—"}
                     </span>
                     <span className="truncate text-[13px] text-[#475569]">
-                      {f.mascota.cliente.nombre}
+                      {r.ficha?.cliente?.nombre ?? "—"}
                     </span>
                     <span className="truncate text-[12.5px] text-[#64748B]">
-                      {f.items[0]?.medicamento ?? "—"}
+                      {r.items[0]?.item ?? "—"}
                     </span>
                     <span className="truncate text-[12.5px] text-[#64748B]">
-                      {f.veterinario?.nombre ?? "—"}
+                      {r.especialista?.nombre ?? "—"}
                     </span>
                     <div className="flex items-center justify-end gap-2">
                       <Link
-                        href={`/formulas/${f.id}`}
+                        href={`/formulas/${r.id}`}
                         title="Ver / Imprimir"
                         className="flex items-center justify-center rounded p-1 text-[#94A3B8] hover:text-[#1E3A6E] transition-colors"
                       >
@@ -118,4 +119,4 @@ export default async function FormulasPage() {
       )}
     </div>
   )
-}
+};

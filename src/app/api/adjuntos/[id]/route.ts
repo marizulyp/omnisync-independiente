@@ -60,7 +60,7 @@ export async function DELETE(
   const { id } = await params
   const adjunto = await prisma.adjunto.findUnique({
     where: { id },
-    include: { mascota: { select: { nombre: true } } },
+    include: { ficha: { select: { nombre: true } } },
   })
   if (!adjunto) return NextResponse.json({ error: "No encontrado" }, { status: 404 })
 
@@ -70,9 +70,9 @@ export async function DELETE(
   await registrarActividad({
     accion: "Eliminar",
     modulo: "Adjuntos",
-    entidad: adjunto.mascota.nombre,
+    entidad: adjunto.ficha.nombre,
     detalle: `Archivo: ${adjunto.nombre}`,
   })
 
   return NextResponse.json({ ok: true })
-}
+};

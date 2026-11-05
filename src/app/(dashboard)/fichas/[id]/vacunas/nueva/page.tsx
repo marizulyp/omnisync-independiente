@@ -8,9 +8,16 @@ export default async function NuevaVacunaPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  await requirePermisoPagina("vacunas", "editar")
-  const { id } = await params
-  const mascota = await prisma.mascota.findUnique({ where: { id }, select: { nombre: true } })
-  if (!mascota) notFound()
-  return <NuevaVacunaForm mascotaId={id} mascotaNombre={mascota.nombre} />
-}
+  await requirePermisoPagina("controles", "editar")
+  
+  const { id: fichaId } = await params
+  
+  const ficha = await prisma.ficha.findUnique({ 
+    where: { id: fichaId }, 
+    select: { id: true, nombre: true } 
+  })
+  
+  if (!ficha) notFound()
+    
+  return <NuevaVacunaForm mascotaId={ficha.id} mascotaNombre={ficha.nombre} />
+};

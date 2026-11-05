@@ -38,14 +38,18 @@ export async function POST(req: NextRequest) {
   }
 
   const file = formData.get("file")
-  const mascotaId = formData.get("mascotaId")
+  
+  // Extraemos fichaId (dejando mascotaId como respaldo temporal si el form no ha sido actualizado)
+  const fichaIdRaw = formData.get("fichaId") || formData.get("mascotaId")
+  const fichaId = typeof fichaIdRaw === "string" ? fichaIdRaw : null
+
   const descripcionRaw = formData.get("descripcion")
   const descripcion =
     typeof descripcionRaw === "string" && descripcionRaw.trim()
       ? descripcionRaw.trim().slice(0, MAX_DESCRIPCION)
       : null
 
-  if (!(file instanceof File) || typeof mascotaId !== "string" || !mascotaId) {
+  if (!(file instanceof File) || !fichaId) {
     return NextResponse.json({ error: "Faltan datos" }, { status: 400 })
   }
 
@@ -70,12 +74,12 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const mascota = await prisma.mascota.findUnique({ where: { id: mascotaId }, select: { id: true, nombre: true } })
-  if (!mascota) return NextResponse.json({ error: "Mascota no encontrada" }, { status: 404 })
+  const ficha = await prisma.ficha.findUnique({ where: { id: fichaId }, select: { id: true, nombre: true } })
+  if (!ficha) return NextResponse.json({ error: "Paciente / Ficha no encontrada" }, { status: 404 })
 
   const nombre = limpiarNombre(file.name)
   const adjunto = await prisma.adjunto.create({
-    data: { nombre, tipo, extension: permitido.ext, tamano: file.size, descripcion, mascotaId },
+    data: { nombre, tipo, extension: permitido.ext, tamano: file.size, descripcion, fichaId },
   })
 
   try {
@@ -91,9 +95,9 @@ export async function POST(req: NextRequest) {
   await registrarActividad({
     accion: "Crear",
     modulo: "Adjuntos",
-    entidad: mascota.nombre,
+    entidad: ficha.nombre,
     detalle: `Archivo: ${nombre}`,
   })
 
   return NextResponse.json({ adjunto })
-}
+};

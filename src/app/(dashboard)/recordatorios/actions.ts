@@ -26,7 +26,10 @@ export async function crearRecordatorio(
   if (!fechaStr) return { error: "La fecha es obligatoria" }
 
   const clienteId = (formData.get("clienteId") as string) || null
-  const mascotaId = (formData.get("mascotaId") as string) || null
+  
+  // Extraemos fichaId (dejando mascotaId como respaldo temporal si el form no ha sido actualizado)
+  const fichaIdRaw = formData.get("fichaId") || formData.get("mascotaId")
+  const fichaId = (fichaIdRaw as string) || null
 
   try {
     await prisma.recordatorio.create({
@@ -34,11 +37,11 @@ export async function crearRecordatorio(
         mensaje,
         fecha: parseFechaLocal(fechaStr),
         clienteId,
-        mascotaId,
+        fichaId, // Ahora guardamos correctamente la relación con la nueva tabla
         usuarioId: await getUsuarioId(),
       },
     })
-  } catch {
+  } catch (error) {
     return { error: "Error al crear el recordatorio" }
   }
   revalidatePath("/recordatorios")
@@ -56,4 +59,4 @@ export async function eliminarRecordatorio(id: string) {
   await prisma.recordatorio.delete({ where: { id } })
   revalidatePath("/recordatorios")
   redirect("/recordatorios?toast=deleted")
-}
+};

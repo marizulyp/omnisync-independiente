@@ -9,7 +9,7 @@ import type { Metadata } from "next"
 import { CLINICA } from "@/config/clinica"
 
 function normalizar(str: string) {
-  return str.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]/g, "_")
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "_")
 }
 
 export async function generateMetadata({
@@ -18,11 +18,11 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
   const { id } = await params
-  const mascota = await prisma.mascota.findUnique({
+  const ficha = await prisma.ficha.findUnique({
     where: { id },
     select: { nombre: true, cliente: { select: { nombre: true } } },
   })
-  if (!mascota) return {}
+  if (!ficha) return {}
   const col = new Date(Date.now() - 5 * 60 * 60 * 1000)
   const dd = String(col.getUTCDate()).padStart(2, "0")
   const mm = String(col.getUTCMonth() + 1).padStart(2, "0")
@@ -30,7 +30,7 @@ export async function generateMetadata({
   const hh = String(col.getUTCHours()).padStart(2, "0")
   const min = String(col.getUTCMinutes()).padStart(2, "0")
   return {
-    title: `Historia_Clinica_${normalizar(mascota.nombre)}_${normalizar(mascota.cliente.nombre.split(" ").slice(-1)[0])}_${dd}${mm}${yyyy}_${hh}${min}`,
+    title: `Historia_Clinica_${normalizar(ficha.nombre)}_${normalizar(ficha.cliente.nombre.split(" ").slice(-1)[0])}_${dd}${mm}${yyyy}_${hh}${min}`,
   }
 }
 
@@ -44,8 +44,11 @@ function fmtMes(date: Date) {
   return date.toLocaleDateString("es-CO", { month: "short", year: "numeric" })
 }
 
-function calcularEdad(fecha: Date | null): string {
-  if (!fecha) return "Desconocida"
+function calcularEdad(fechaStr: string | null | undefined): string {
+  if (!fechaStr) return "Desconocida"
+  const fecha = new Date(fechaStr)
+  if (isNaN(fecha.getTime())) return "Desconocida"
+  
   const hoy = new Date()
   const años = hoy.getFullYear() - fecha.getFullYear()
   const meses = hoy.getMonth() - fecha.getMonth()
@@ -114,25 +117,35 @@ export default async function ResumenPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const mascota = await prisma.mascota.findUnique({
+  const ficha = await prisma.ficha.findUnique({
     where: { id },
     include: {
       cliente: true,
-      consultas: {
+      atenciones: {
         orderBy: { fecha: "desc" },
-        include: { veterinario: { select: { nombre: true } } },
+        include: { especialista: { select: { nombre: true } } },
       },
-      vacunas: { orderBy: { fecha: "desc" } },
-      desparasitaciones: { orderBy: { fecha: "desc" } },
+      controles: { orderBy: { fecha: "desc" } },
       adjuntos: { orderBy: { creadoEn: "asc" } },
     },
   })
-  if (!mascota) notFound()
+  
+  if (!ficha) notFound()
+
+  // Extracción segura del JSON de datos generales de la ficha
+  const datosFicha = (ficha.datosGenerales as any) || {}
+  const especieFicha = datosFicha.especie || ficha.tipo
+  const razaFicha = datosFicha.raza || ""
+  const pesoFicha = datosFicha.peso || ""
+
+  // Filtramos los controles preventivos en Vacunas y Desparasitaciones según el "tipo"
+  const vacunas = ficha.controles.filter(c => c.tipo.toLowerCase() === "vacuna")
+  const desparasitaciones = ficha.controles.filter(c => c.tipo.toLowerCase() !== "vacuna")
 
   // Convertir imágenes adjuntas a base64 para incrustar en el PDF imprimible
-  type AdjuntoConData = (typeof mascota.adjuntos)[0] & { dataUri?: string }
+  type AdjuntoConData = (typeof ficha.adjuntos)[0] & { dataUri?: string }
   const adjuntosConData: AdjuntoConData[] = await Promise.all(
-    mascota.adjuntos.map(async (a) => {
+    ficha.adjuntos.map(async (a) => {
       if (!a.tipo.startsWith("image/")) return a
       try {
         const buffer = await readFile(
@@ -148,31 +161,21 @@ export default async function ResumenPage({
   const hoy = new Date()
   const generadoEn = hoy.toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric" })
 
-  // Pendientes: vacunas y desparasitaciones con próxima dosis
-  const pendientesVacunas = mascota.vacunas
-    .filter((v) => v.proximaDosis)
-    .map((v) => ({
-      nombre: `Vacuna de ${v.nombre.toLowerCase()}`,
-      fecha: v.proximaDosis!,
-      vencida: esVencida(v.proximaDosis),
+  // Pendientes unificados a través de Controles Preventivos
+  const pendientes = ficha.controles
+    .filter((c) => c.proximaFecha)
+    .map((c) => ({
+      nombre: c.tipo.toLowerCase() === "vacuna" ? `Vacuna de ${c.nombre.toLowerCase()}` : `Desparasitación ${c.tipo}`,
+      fecha: c.proximaFecha!,
+      vencida: esVencida(c.proximaFecha),
     }))
-
-  const pendientesDesparas = mascota.desparasitaciones
-    .filter((d) => d.proximaDosis)
-    .map((d) => ({
-      nombre: `Desparasitación ${d.tipo}`,
-      fecha: d.proximaDosis!,
-      vencida: esVencida(d.proximaDosis),
-    }))
-
-  const pendientes = [...pendientesVacunas, ...pendientesDesparas]
     .sort((a, b) => a.fecha.getTime() - b.fecha.getTime())
 
   return (
     <>
       {/* Barra de acciones — solo pantalla */}
       <div className="print:hidden flex items-center gap-4 p-4 border-b border-gray-200 bg-white">
-        <Link href={`/mascotas/${id}`} className="text-sm text-gray-500 hover:text-gray-700">
+        <Link href={`/fichas/${id}`} className="text-sm text-gray-500 hover:text-gray-700">
           ← Volver
         </Link>
         <BtnImprimir />
@@ -210,7 +213,7 @@ export default async function ResumenPage({
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 6 }}>
           {/* Logo */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={CLINICA.logo} alt={CLINICA.nombre} style={{  width: 200, height: 150}} />
+          <img src={CLINICA.logo} alt={CLINICA.nombre} style={{ width: 200, height: 150, objectFit: "contain" }} />
 
           {/* Info clínica */}
           <div style={{ textAlign: "right" }}>
@@ -232,12 +235,12 @@ export default async function ResumenPage({
         {/* ── Paciente ────────────────────────────────────────────── */}
         <div style={{ marginBottom: 20 }}>
           <h1 style={{ fontSize: 26, fontWeight: 800, color: "#0F1720", margin: 0, lineHeight: 1.15 }}>
-            {mascota.nombre} {mascota.cliente.nombre.split(" ").slice(-1)[0]}
+            {ficha.nombre} {ficha.cliente.nombre.split(" ").slice(-1)[0]}
           </h1>
           <p style={{ fontSize: 12, color: "#64748B", margin: "4px 0 0" }}>
-            {ESPECIE_LABEL[mascota.especie] ?? mascota.especie}
-            {mascota.raza ? ` · ${mascota.raza}` : ""}
-            {mascota.fechaNacimiento ? ` · ${calcularEdad(mascota.fechaNacimiento)}` : ""}
+            {ESPECIE_LABEL[especieFicha] ?? especieFicha}
+            {razaFicha ? ` · ${razaFicha}` : ""}
+            {datosFicha.fechaNacimiento ? ` · ${calcularEdad(datosFicha.fechaNacimiento)}` : ""}
             {" · Generada el "}
             <span style={{ color: "#1E3A6E", fontWeight: 600 }}>{generadoEn}</span>
           </p>
@@ -245,27 +248,27 @@ export default async function ResumenPage({
 
         {/* Tarjetas de datos */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 24 }}>
-          <InfoCard label="Propietario" value={mascota.cliente.nombre} />
-          <InfoCard label="Teléfono" value={mascota.cliente.telefono ?? "—"} />
-          <InfoCard label="Identificación" value={mascota.cliente.identificacion ?? "—"} />
+          <InfoCard label="Propietario" value={ficha.cliente.nombre} />
+          <InfoCard label="Teléfono" value={ficha.cliente.telefono ?? "—"} />
+          <InfoCard label="Identificación" value={ficha.cliente.identificacion ?? "—"} />
           <InfoCard
             label="Especie / Raza"
-            value={`${ESPECIE_LABEL[mascota.especie] ?? mascota.especie}${mascota.raza ? ` — ${mascota.raza}` : ""}`}
+            value={`${ESPECIE_LABEL[especieFicha] ?? especieFicha}${razaFicha ? ` — ${razaFicha}` : ""}`}
           />
-          <InfoCard label="Edad" value={calcularEdad(mascota.fechaNacimiento)} />
-          <InfoCard label="Peso actual" value={mascota.peso ? `${mascota.peso} kg` : "—"} />
+          <InfoCard label="Edad" value={calcularEdad(datosFicha.fechaNacimiento)} />
+          <InfoCard label="Peso actual" value={pesoFicha ? `${pesoFicha} kg` : "—"} />
         </div>
 
         {/* ── Vacunas ─────────────────────────────────────────────── */}
         <div style={{ marginBottom: 22, pageBreakInside: "avoid" }}>
-          <SeccionHeader title={`Vacunas (${mascota.vacunas.length})`} />
-          {mascota.vacunas.length === 0 ? (
+          <SeccionHeader title={`Vacunas (${vacunas.length})`} />
+          {vacunas.length === 0 ? (
             <p style={{ fontSize: 11, color: "#94A3B8", fontStyle: "italic" }}>Sin vacunas registradas</p>
           ) : (
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11.5 }}>
               <thead>
                 <tr>
-                  {["Vacuna", "Aplicada", "Próxima dosis", "Lote"].map((h) => (
+                  {["Vacuna", "Aplicada", "Próxima dosis", "Notas"].map((h) => (
                     <th key={h} style={{ textAlign: "left", paddingBottom: 6, color: "#64748B", fontSize: 9.5, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", borderBottom: "1px solid #E2E8F0" }}>
                       {h}
                     </th>
@@ -273,18 +276,18 @@ export default async function ResumenPage({
                 </tr>
               </thead>
               <tbody>
-                {mascota.vacunas.map((v, i) => {
-                  const venc = esVencida(v.proximaDosis)
+                {vacunas.map((v, i) => {
+                  const venc = esVencida(v.proximaFecha)
                   return (
                     <tr key={v.id} style={{ background: i % 2 === 1 ? "#F8FAFC" : "transparent" }}>
                       <td style={{ padding: "7px 0", fontWeight: 600, color: "#0F1720" }}>{v.nombre}</td>
                       <td style={{ padding: "7px 8px", color: "#475569" }}>{fmt(v.fecha)}</td>
                       <td style={{ padding: "7px 8px", color: venc ? "#DC2626" : "#475569", fontWeight: venc ? 600 : 400 }}>
-                        {v.proximaDosis ? (
-                          <>{fmt(v.proximaDosis)}{venc && <span style={{ marginLeft: 4, fontSize: 10, color: "#DC2626" }}>· vencida</span>}</>
+                        {v.proximaFecha ? (
+                          <>{fmt(v.proximaFecha)}{venc && <span style={{ marginLeft: 4, fontSize: 10, color: "#DC2626" }}>· vencida</span>}</>
                         ) : "—"}
                       </td>
-                      <td style={{ padding: "7px 8px", color: "#94A3B8" }}>{v.lote ?? "—"}</td>
+                      <td style={{ padding: "7px 8px", color: "#94A3B8" }}>{v.notas ?? "—"}</td>
                     </tr>
                   )
                 })}
@@ -295,8 +298,8 @@ export default async function ResumenPage({
 
         {/* ── Desparasitaciones ────────────────────────────────────── */}
         <div style={{ marginBottom: 22, pageBreakInside: "avoid" }}>
-          <SeccionHeader title={`Desparasitaciones (${mascota.desparasitaciones.length})`} />
-          {mascota.desparasitaciones.length === 0 ? (
+          <SeccionHeader title={`Desparasitaciones (${desparasitaciones.length})`} />
+          {desparasitaciones.length === 0 ? (
             <p style={{ fontSize: 11, color: "#94A3B8", fontStyle: "italic" }}>Sin desparasitaciones registradas</p>
           ) : (
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11.5 }}>
@@ -310,16 +313,16 @@ export default async function ResumenPage({
                 </tr>
               </thead>
               <tbody>
-                {mascota.desparasitaciones.map((d, i) => {
-                  const venc = esVencida(d.proximaDosis)
+                {desparasitaciones.map((d, i) => {
+                  const venc = esVencida(d.proximaFecha)
                   return (
                     <tr key={d.id} style={{ background: i % 2 === 1 ? "#F8FAFC" : "transparent" }}>
                       <td style={{ padding: "7px 0", color: "#475569" }}>{fmt(d.fecha)}</td>
                       <td style={{ padding: "7px 8px", color: "#475569", textTransform: "capitalize" }}>{d.tipo}</td>
-                      <td style={{ padding: "7px 8px", color: "#475569" }}>{d.producto ?? "—"}</td>
+                      <td style={{ padding: "7px 8px", color: "#475569" }}>{d.nombre ?? "—"}</td>
                       <td style={{ padding: "7px 8px", color: venc ? "#DC2626" : "#475569", fontWeight: venc ? 600 : 400 }}>
-                        {d.proximaDosis ? (
-                          <>{fmt(d.proximaDosis)}{venc && <span style={{ marginLeft: 4, fontSize: 10, color: "#DC2626" }}>· vencida</span>}</>
+                        {d.proximaFecha ? (
+                          <>{fmt(d.proximaFecha)}{venc && <span style={{ marginLeft: 4, fontSize: 10, color: "#DC2626" }}>· vencida</span>}</>
                         ) : "—"}
                       </td>
                     </tr>
@@ -330,50 +333,55 @@ export default async function ResumenPage({
           )}
         </div>
 
-        {/* ── Consultas ────────────────────────────────────────────── */}
+        {/* ── Atenciones Clínicas ────────────────────────────────────────────── */}
         <div style={{ marginBottom: 22 }}>
-          <SeccionHeader title={`Consultas (${mascota.consultas.length})`} />
-          {mascota.consultas.length === 0 ? (
-            <p style={{ fontSize: 11, color: "#94A3B8", fontStyle: "italic" }}>Sin consultas registradas</p>
+          <SeccionHeader title={`Atenciones Médicas (${ficha.atenciones.length})`} />
+          {ficha.atenciones.length === 0 ? (
+            <p style={{ fontSize: 11, color: "#94A3B8", fontStyle: "italic" }}>Sin atenciones registradas</p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {mascota.consultas.map((c) => (
-                <div
-                  key={c.id}
-                  style={{ border: "1px solid #E2E8F0", borderRadius: 10, padding: "12px 14px", pageBreakInside: "avoid" }}
-                >
-                  {/* Cabecera */}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-                    <h3 style={{ fontSize: 14, fontWeight: 700, color: "#0F1720", margin: 0 }}>{c.motivo}</h3>
-                    <span style={{ fontSize: 10, color: "#1E3A6E" }}>
-                      {fmt(c.fecha)}{c.veterinario ? ` · Dr(a). ${c.veterinario.nombre}` : ""}
-                    </span>
-                  </div>
-
-                  {/* Signos vitales */}
-                  {(c.peso || c.temperatura || c.frecuenciaCardiaca || c.frecuenciaRespiratoria || c.condicionCorporal || c.mucosas) && (
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
-                      {c.peso && <VitalChip label="Peso" value={`${c.peso} kg`} />}
-                      {c.temperatura && <VitalChip label="Temp." value={`${c.temperatura} °C`} />}
-                      {c.frecuenciaCardiaca && <VitalChip label="FC" value={`${c.frecuenciaCardiaca} lpm`} />}
-                      {c.frecuenciaRespiratoria && <VitalChip label="FR" value={`${c.frecuenciaRespiratoria} rpm`} />}
-                      {c.condicionCorporal && <VitalChip label="CC" value={`${c.condicionCorporal}/9`} />}
-                      {c.mucosas && <VitalChip label="Mucosas" value={c.mucosas} />}
+              {ficha.atenciones.map((a) => {
+                const det = (a.detalles as any) || {}
+                const tieneSignos = det.peso || det.temperatura || det.frecuenciaCardiaca || det.frecuenciaRespiratoria || det.condicionCorporal || det.mucosas
+                
+                return (
+                  <div
+                    key={a.id}
+                    style={{ border: "1px solid #E2E8F0", borderRadius: 10, padding: "12px 14px", pageBreakInside: "avoid" }}
+                  >
+                    {/* Cabecera */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+                      <h3 style={{ fontSize: 14, fontWeight: 700, color: "#0F1720", margin: 0 }}>{a.motivo}</h3>
+                      <span style={{ fontSize: 10, color: "#1E3A6E" }}>
+                        {fmt(a.fecha)}{a.especialista ? ` · Dr(a). ${a.especialista.nombre}` : ""}
+                      </span>
                     </div>
-                  )}
 
-                  {/* Campos clínicos */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                    {c.anamnesis && <FieldRow label="Anamnesis" value={c.anamnesis} />}
-                    {c.sintomas && <FieldRow label="Síntomas" value={c.sintomas} />}
-                    {c.examenFisico && <FieldRow label="Examen físico" value={c.examenFisico} />}
-                    {c.diagnostico && <FieldRow label="Diagnóstico" value={c.diagnostico} />}
-                    {c.tratamiento && <FieldRow label="Tratamiento" value={c.tratamiento} />}
-                    {c.plan && <FieldRow label="Plan" value={c.plan} />}
-                    {c.observaciones && <FieldRow label="Observaciones" value={c.observaciones} />}
+                    {/* Signos vitales */}
+                    {tieneSignos && (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+                        {det.peso && <VitalChip label="Peso" value={`${det.peso} kg`} />}
+                        {det.temperatura && <VitalChip label="Temp." value={`${det.temperatura} °C`} />}
+                        {det.frecuenciaCardiaca && <VitalChip label="FC" value={`${det.frecuenciaCardiaca} lpm`} />}
+                        {det.frecuenciaRespiratoria && <VitalChip label="FR" value={`${det.frecuenciaRespiratoria} rpm`} />}
+                        {det.condicionCorporal && <VitalChip label="CC" value={`${det.condicionCorporal}/9`} />}
+                        {det.mucosas && <VitalChip label="Mucosas" value={det.mucosas} />}
+                      </div>
+                    )}
+
+                    {/* Campos clínicos */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                      {det.anamnesis && <FieldRow label="Anamnesis" value={det.anamnesis} />}
+                      {det.sintomas && <FieldRow label="Síntomas" value={det.sintomas} />}
+                      {det.examenFisico && <FieldRow label="Examen físico" value={det.examenFisico} />}
+                      {det.diagnostico && <FieldRow label="Diagnóstico" value={det.diagnostico} />}
+                      {det.tratamiento && <FieldRow label="Tratamiento" value={det.tratamiento} />}
+                      {det.plan && <FieldRow label="Plan" value={det.plan} />}
+                      {det.observaciones && <FieldRow label="Observaciones" value={det.observaciones} />}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
@@ -450,10 +458,10 @@ export default async function ResumenPage({
             Documento clínico confidencial · Uso exclusivo del propietario y del equipo veterinario.
           </p>
           <p style={{ fontSize: 9, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            {mascota.nombre.toUpperCase()} · {hoy.toLocaleDateString("es-CO", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase()}
+            {ficha.nombre.toUpperCase()} · {hoy.toLocaleDateString("es-CO", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase()}
           </p>
         </div>
       </div>
     </>
   )
-}
+};
