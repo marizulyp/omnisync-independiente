@@ -8,7 +8,7 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" })
 
 // Íconos servidos desde la propia app (no desde Google), para que se vean
-// aunque la clínica no tenga internet. "block": nunca mostrar el nombre del ícono como texto.
+// aunque el negocio no tenga internet. "block": nunca mostrar el nombre del ícono como texto.
 const iconos = localFont({
   src: "../../node_modules/material-symbols/material-symbols-outlined.woff2",
   variable: "--font-iconos",
@@ -17,7 +17,7 @@ const iconos = localFont({
 })
 
 export const viewport: Viewport = {
-  themeColor: "#1E3A6E",
+  themeColor: "#090d0c",
   width: "device-width",
   initialScale: 1,
 }
@@ -27,15 +27,19 @@ export const metadata: Metadata = {
     default: CLINICA.nombre,
     template: `%s | ${CLINICA.nombre}`,
   },
-  description: "Sistema de gestión veterinaria",
+  description: "Plataforma de gestión modular — OmniSync",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: CLINICA.nombre,
   },
   icons: {
-    icon: "/icons/icon-192.png",
-    apple: "/icons/icon-192.png",
+    icon: [
+      { url: "/icons/icon-192.png?v=2", type: "image/png", sizes: "192x192" },
+      { url: "/favicon.ico?v=2", sizes: "any" },
+    ],
+    shortcut: "/icons/icon-192.png?v=2",
+    apple: "/icons/icon-192.png?v=2",
   },
 }
 
