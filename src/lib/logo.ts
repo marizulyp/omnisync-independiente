@@ -12,7 +12,6 @@ function obtenerIconoSvg(tipo: string): { icono: string; subtitulo: string } {
     case "barberia":
       return {
         subtitulo: "BARBERÍA & BELLEZA",
-        // Tijeras + peinilla
         icono: `
           <g stroke="#34D399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none">
             <circle cx="5.5" cy="6.5" r="2.3" stroke="#FFFFFF" />
@@ -32,7 +31,6 @@ function obtenerIconoSvg(tipo: string): { icono: string; subtitulo: string } {
     case "taller":
       return {
         subtitulo: "TALLER MECÁNICO",
-        // Llave inglesa + engranaje
         icono: `
           <g stroke="#34D399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none">
             <path d="M14.7 6.3a4.5 4.5 0 0 0-6.1 5.9L4 16.8a1.8 1.8 0 0 0 2.6 2.6l4.6-4.6a4.5 4.5 0 0 0 5.9-6.1l-2.6 2.6-2.4-.6-.6-2.4 2.6-2.6z" stroke="#FFFFFF" />
@@ -48,7 +46,6 @@ function obtenerIconoSvg(tipo: string): { icono: string; subtitulo: string } {
     case "medico":
       return {
         subtitulo: "SALUD & CONSULTORIO",
-        // Escudo médico
         icono: `
           <g stroke="#34D399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none">
             <path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3z" />
@@ -60,7 +57,6 @@ function obtenerIconoSvg(tipo: string): { icono: string; subtitulo: string } {
     case "veterinaria":
       return {
         subtitulo: "VETERINARIA",
-        // Huella + cruz
         icono: `
           <g>
             <circle cx="6.5" cy="9.5" r="1.6" fill="#34D399" />
@@ -94,6 +90,7 @@ export function crearLogo(
   const nombreSeguro = escaparXml(nombre.trim() || "Mi Negocio")
   const tipoNormalizado = (tipoNegocio || "veterinaria").toLowerCase().trim()
   const { icono, subtitulo } = obtenerIconoSvg(tipoNormalizado)
+  const subtituloSeguro = escaparXml(subtitulo)
 
   const tamanoFuente =
     nombre.length > 22 ? 13 : nombre.length > 16 ? 15 : nombre.length > 12 ? 18 : 22
@@ -125,7 +122,7 @@ export function crearLogo(
       </text>
 
       <text x="100" y="133" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, monospace" font-size="8.5" font-weight="600" letter-spacing="1.4" fill="${colorSubtitulo}">
-        ${subtitulo}
+        ${subtituloSeguro}
       </text>
     </svg>
   `.trim()
