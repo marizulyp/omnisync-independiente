@@ -43,14 +43,36 @@ export const metadata: Metadata = {
   },
 }
 
+const SCRIPT_TEMA = `
+(function() {
+  try {
+    var tema = localStorage.getItem("omnisync-tema");
+    if (tema === "light") {
+      document.documentElement.classList.remove("dark");
+    } else {
+      document.documentElement.classList.add("dark");
+    }
+  } catch (e) {
+    document.documentElement.classList.add("dark");
+  }
+})();
+`
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`${geist.variable} ${geistMono.variable} ${iconos.variable} h-full antialiased`}>
-      <body className="min-h-full bg-zinc-950 text-zinc-100 print:bg-white print:text-slate-900">
+    <html
+      lang="es"
+      suppressHydrationWarning
+      className={`dark ${geist.variable} ${geistMono.variable} ${iconos.variable} h-full antialiased`}
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
+      </head>
+      <body className="min-h-full bg-[#F4F6F8] text-[#0F1720] dark:bg-zinc-950 dark:text-zinc-100 print:bg-white print:text-slate-900">
         {children}
       </body>
     </html>

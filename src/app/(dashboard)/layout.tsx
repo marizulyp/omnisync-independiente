@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma"
 import { ToastNotification } from "@/components/ui/ToastNotification"
 import { MarcoApp } from "@/components/ui/MarcoApp"
 import { BuscadorGlobal } from "@/components/ui/BuscadorGlobal"
+import { BotonTema } from "@/components/ui/BotonTema"
 import { tienePermiso, type Accion, type Modulo } from "@/lib/permisos"
 import { crearLogo } from "@/lib/logo"
 
@@ -138,7 +139,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const tipoNegocio = negocio?.tipoNegocio || "veterinaria"
   const modulosActivos = negocio?.modulosActivos || []
   const nombreNegocio = negocio?.nombre || "Mi Negocio"
-  const logoNegocio = negocio?.logoUrl || crearLogo(nombreNegocio, tipoNegocio, "dark")
+  const logoLight = crearLogo(nombreNegocio, tipoNegocio, "light")
+  const logoDark = crearLogo(nombreNegocio, tipoNegocio, "dark")
 
   const nav = navPorConfiguracion(session.user.rol ?? "asistente", tipoNegocio, modulosActivos)
   const dicc = DICCIONARIO[tipoNegocio] || DICCIONARIO["veterinaria"]
@@ -168,15 +170,24 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const menu = (
     <>
-      <div className="px-[14px] pt-4 pb-4 flex flex-col items-center border-b border-white/10">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={logoNegocio} alt={nombreNegocio} style={{ width: 200, height: 142, objectFit: "contain" }} />
+      <div className="px-[14px] pt-4 pb-4 flex flex-col items-center border-b border-slate-200 dark:border-white/10">
+        {negocio?.logoUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img src={negocio.logoUrl} alt={nombreNegocio} style={{ width: 200, height: 142, objectFit: "contain" }} />
+        ) : (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logoLight} alt={nombreNegocio} className="block dark:hidden" style={{ width: 200, height: 142, objectFit: "contain" }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logoDark} alt={nombreNegocio} className="hidden dark:block" style={{ width: 200, height: 142, objectFit: "contain" }} />
+          </>
+        )}
       </div>
 
       <nav className="flex-1 overflow-y-auto px-[10px] py-3">
         {nav.clinica.length > 0 && (
           <>
-            <p className="mx-3 mt-2.5 mb-1.5 font-mono text-[10px] tracking-[0.12em] text-zinc-500 uppercase">Atención</p>
+            <p className="mx-3 mt-2.5 mb-1.5 font-mono text-[10px] tracking-[0.12em] text-slate-400 dark:text-zinc-500 uppercase">Atención</p>
             <div className="flex flex-col gap-1">
               {nav.clinica.map((item) => (
                 <NavLink key={item.href} href={item.href} icon={item.icon} label={item.label} />
@@ -187,7 +198,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
         {nav.operacion.length > 0 && (
           <>
-            <p className="mx-3 mt-4 mb-1.5 font-mono text-[10px] tracking-[0.12em] text-zinc-500 uppercase">Operación</p>
+            <p className="mx-3 mt-4 mb-1.5 font-mono text-[10px] tracking-[0.12em] text-slate-400 dark:text-zinc-500 uppercase">Operación</p>
             <div className="flex flex-col gap-1">
               {nav.operacion.map((item) => (
                 <NavLink
@@ -204,7 +215,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
         {nav.admin.length > 0 && (
           <>
-            <p className="mx-3 mt-4 mb-1.5 font-mono text-[10px] tracking-[0.12em] text-zinc-500 uppercase">Administración</p>
+            <p className="mx-3 mt-4 mb-1.5 font-mono text-[10px] tracking-[0.12em] text-slate-400 dark:text-zinc-500 uppercase">Administración</p>
             <div className="flex flex-col gap-1">
               {nav.admin.map((item) => (
                 <NavLink key={item.href} href={item.href} icon={item.icon} label={item.label} />
@@ -214,20 +225,20 @@ export default async function DashboardLayout({ children }: { children: React.Re
         )}
       </nav>
 
-      <div className="p-3 border-t border-white/10">
+      <div className="p-3 border-t border-slate-200 dark:border-white/10">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-500/30 bg-emerald-500/15 font-semibold text-[12.5px] text-emerald-400">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-500/30 bg-emerald-500/15 font-semibold text-[12.5px] text-emerald-700 dark:text-emerald-400">
             {iniciales}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-medium text-zinc-100">{session.user.name}</p>
-            <p className="text-[11.5px] text-zinc-500">{ROL_LABEL[session.user.rol ?? ""] ?? session.user.rol}</p>
+            <p className="truncate text-[13px] font-medium text-slate-900 dark:text-zinc-100">{session.user.name}</p>
+            <p className="text-[11.5px] text-slate-500 dark:text-zinc-500">{ROL_LABEL[session.user.rol ?? ""] ?? session.user.rol}</p>
           </div>
           <form action={logout}>
             <button
               type="submit"
               title="Cerrar sesión"
-              className="flex items-center justify-center rounded-lg p-1.5 text-zinc-500 hover:bg-white/5 hover:text-zinc-200 transition-colors"
+              className="flex items-center justify-center rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:text-zinc-500 dark:hover:bg-white/5 dark:hover:text-zinc-200 transition-colors"
             >
               <Icon name="logout" size={18} />
             </button>
@@ -241,21 +252,22 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <>
       <BuscadorGlobal tipoNegocio={tipoNegocio} />
       <div className="ml-auto flex items-center gap-2">
+        <BotonTema />
         {tienePermiso(session.user.rol, "atenciones", "editar") && modulosActivos.includes("atenciones") && (
           <Link
             href="/atenciones"
-            className="flex items-center gap-[7px] rounded-lg border border-white/10 bg-white/5 px-[11px] sm:px-[13px] py-2 text-[13px] text-zinc-200 hover:bg-white/10 hover:border-white/20 transition-colors"
+            className="flex items-center gap-[7px] rounded-lg border border-slate-200 bg-white px-[11px] sm:px-[13px] py-2 text-[13px] text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10 transition-colors"
           >
-            <Icon name="medical_services" size={17} className="text-emerald-400" />
+            <Icon name="medical_services" size={17} className="text-emerald-600 dark:text-emerald-400" />
             <span className="hidden sm:inline">{dicc.botonAtencion}</span>
           </Link>
         )}
         {tienePermiso(session.user.rol, "agenda", "editar") && modulosActivos.includes("agenda") && (
           <Link
             href="/agenda/nueva"
-            className="flex items-center gap-[7px] rounded-lg bg-emerald-500 px-[11px] sm:px-[15px] py-[9px] text-[13px] font-bold text-zinc-950 hover:bg-emerald-400 shadow-[0_0_20px_-4px_rgba(16,185,129,0.5)] transition-colors"
+            className="flex items-center gap-[7px] rounded-lg bg-emerald-600 px-[11px] sm:px-[15px] py-[9px] text-[13px] font-bold text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400 shadow-[0_0_20px_-4px_rgba(16,185,129,0.45)] transition-colors"
           >
-            <Icon name="add" size={17} className="text-zinc-950" />
+            <Icon name="add" size={17} className="text-white dark:text-zinc-950" />
             <span className="hidden sm:inline">{dicc.botonCita}</span>
           </Link>
         )}

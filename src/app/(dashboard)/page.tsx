@@ -160,27 +160,30 @@ export default async function HomePage() {
       value: atencionesHoy,
       icon: "clinical_notes",
       href: "/atenciones",
-      iconClass: "text-emerald-400",
-      bgClass: "bg-emerald-500/15 border-emerald-500/20",
-      valueClass: "text-zinc-100",
+      iconClass: "text-emerald-600 dark:text-emerald-400",
+      bgClass: "bg-emerald-50 border-emerald-200 dark:bg-emerald-500/15 dark:border-emerald-500/20",
+      valueClass: "text-slate-900 dark:text-zinc-100",
     },
     {
       label: dicc.citasPendientes,
       value: citasPendientes,
       icon: "calendar_month",
       href: "/agenda",
-      iconClass: "text-cyan-400",
-      bgClass: "bg-cyan-500/15 border-cyan-500/20",
-      valueClass: "text-cyan-400",
+      iconClass: "text-cyan-600 dark:text-cyan-400",
+      bgClass: "bg-cyan-50 border-cyan-200 dark:bg-cyan-500/15 dark:border-cyan-500/20",
+      valueClass: "text-cyan-700 dark:text-cyan-400",
     },
     {
       label: "Stock bajo mínimo",
       value: productosMinimo,
       icon: "inventory_2",
       href: "/inventario",
-      iconClass: productosMinimo > 0 ? "text-amber-400" : "text-zinc-400",
-      bgClass: productosMinimo > 0 ? "bg-amber-500/15 border-amber-500/25" : "bg-white/5 border-white/10",
-      valueClass: productosMinimo > 0 ? "text-amber-400" : "text-zinc-200",
+      iconClass: productosMinimo > 0 ? "text-amber-600 dark:text-amber-400" : "text-slate-500 dark:text-zinc-400",
+      bgClass:
+        productosMinimo > 0
+          ? "bg-amber-50 border-amber-200 dark:bg-amber-500/15 dark:border-amber-500/25"
+          : "bg-slate-100 border-slate-200 dark:bg-white/5 dark:border-white/10",
+      valueClass: productosMinimo > 0 ? "text-amber-600 dark:text-amber-400" : "text-slate-800 dark:text-zinc-200",
     },
     {
       label: "Ingresos del mes",
@@ -188,9 +191,9 @@ export default async function HomePage() {
       icon: "account_balance_wallet",
       href: "/finanzas",
       visible: tienePermiso(rol, "finanzas", "ver"),
-      iconClass: "text-emerald-400",
-      bgClass: "bg-emerald-500/15 border-emerald-500/25",
-      valueClass: "text-emerald-400",
+      iconClass: "text-emerald-600 dark:text-emerald-400",
+      bgClass: "bg-emerald-50 border-emerald-200 dark:bg-emerald-500/15 dark:border-emerald-500/25",
+      valueClass: "text-emerald-700 dark:text-emerald-400",
       mono: true,
     },
     {
@@ -198,9 +201,9 @@ export default async function HomePage() {
       value: nuevosClientesMes,
       icon: "group_add",
       href: "/clientes",
-      iconClass: "text-teal-400",
-      bgClass: "bg-teal-500/15 border-teal-500/20",
-      valueClass: "text-teal-300",
+      iconClass: "text-teal-600 dark:text-teal-400",
+      bgClass: "bg-teal-50 border-teal-200 dark:bg-teal-500/15 dark:border-teal-500/20",
+      valueClass: "text-teal-700 dark:text-teal-300",
     },
   ]
 
@@ -208,12 +211,11 @@ export default async function HomePage() {
     <div>
       <AutoRefresh segundos={60} />
 
-      {/* Saludo */}
       <div className="mb-6">
-        <h1 className="text-[22px] font-bold tracking-[-0.015em] text-zinc-50">
+        <h1 className="text-[22px] font-bold tracking-[-0.015em] text-slate-900 dark:text-zinc-50">
           Buenos días, {nombre}
         </h1>
-        <p className="mt-[5px] font-mono text-[11.5px] tracking-[0.06em] text-zinc-500 uppercase">
+        <p className="mt-[5px] font-mono text-[11.5px] tracking-[0.06em] text-slate-500 dark:text-zinc-500 uppercase">
           {hoy.toLocaleDateString("es-CO", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
         </p>
       </div>
@@ -226,7 +228,7 @@ export default async function HomePage() {
             <Link
               key={k.label}
               href={k.href}
-              className="group flex flex-col rounded-2xl border border-white/10 bg-zinc-900/70 backdrop-blur-sm p-4 hover:border-emerald-500/40 hover:bg-zinc-900 transition-all"
+              className="group flex flex-col rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-zinc-900/70 backdrop-blur-sm p-4 hover:border-emerald-500/50 dark:hover:bg-zinc-900 transition-all"
             >
               <div className={`mb-3 flex h-9 w-9 items-center justify-center rounded-xl border ${k.bgClass}`}>
                 <Icon name={k.icon} size={20} className={k.iconClass} />
@@ -234,64 +236,68 @@ export default async function HomePage() {
               <p className={`text-[22px] font-bold leading-none ${k.valueClass} ${k.mono ? "font-mono" : ""}`}>
                 {k.value}
               </p>
-              <p className="mt-1.5 text-[12px] text-zinc-400 group-hover:text-zinc-300 transition-colors">{k.label}</p>
+              <p className="mt-1.5 text-[12px] text-slate-500 dark:text-zinc-400 group-hover:text-slate-700 dark:group-hover:text-zinc-300 transition-colors">
+                {k.label}
+              </p>
             </Link>
           ))}
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
         {/* Agenda de hoy */}
-        <div className="rounded-2xl border border-white/10 bg-zinc-900/70 backdrop-blur-sm">
-          <div className="flex items-center justify-between px-[18px] py-[14px] border-b border-white/10">
+        <div className="rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-zinc-900/70 backdrop-blur-sm">
+          <div className="flex items-center justify-between px-[18px] py-[14px] border-b border-slate-100 dark:border-white/10">
             <div>
-              <p className="text-[14px] font-semibold text-zinc-100">Agenda de hoy</p>
-              <p className="font-mono text-[10.5px] tracking-[0.06em] text-zinc-500 uppercase">
+              <p className="text-[14px] font-semibold text-slate-900 dark:text-zinc-100">Agenda de hoy</p>
+              <p className="font-mono text-[10.5px] tracking-[0.06em] text-slate-400 dark:text-zinc-500 uppercase">
                 {citasHoy.length} {citasHoy.length === 1 ? dicc.citaSingular : dicc.citaPlural}
               </p>
             </div>
             <Link
               href="/agenda"
-              className="flex items-center gap-1 text-[12.5px] font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
+              className="flex items-center gap-1 text-[12.5px] font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors"
             >
               Ver agenda
-              <Icon name="arrow_forward" size={15} className="text-emerald-400" />
+              <Icon name="arrow_forward" size={15} className="text-emerald-600 dark:text-emerald-400" />
             </Link>
           </div>
 
           {citasHoy.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-zinc-500">
-              <Icon name="event_available" size={36} className="mb-2 opacity-35 text-emerald-400" />
+            <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-zinc-500">
+              <Icon name="event_available" size={36} className="mb-2 opacity-40 text-emerald-500 dark:text-emerald-400" />
               <p className="text-[12.5px]">{dicc.sinCitasHoy}</p>
             </div>
           ) : (
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-slate-100 dark:divide-white/5">
               {citasHoy.map((c) => (
                 <div
                   key={c.id}
-                  className="flex items-center gap-3.5 px-[18px] py-3 hover:bg-white/[0.03] transition-colors"
+                  className="flex items-center gap-3.5 px-[18px] py-3 hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors"
                 >
                   <div className="flex w-[60px] shrink-0 flex-col items-center">
-                    <span className="font-mono text-[12.5px] font-semibold text-emerald-400">
+                    <span className="font-mono text-[12.5px] font-semibold text-emerald-600 dark:text-emerald-400">
                       {formatHora(c.fecha)}
                     </span>
                   </div>
                   <div
                     className="h-8 w-[3px] shrink-0 rounded-full"
-                    style={{ backgroundColor: c.estado === "confirmada" ? "#10B981" : "#3F3F46" }}
+                    style={{ backgroundColor: c.estado === "confirmada" ? "#10B981" : "#64748B" }}
                   />
                   <div className="min-w-0">
-                    <p className="text-[13.5px] font-medium text-zinc-100 truncate">
+                    <p className="text-[13.5px] font-medium text-slate-900 dark:text-zinc-100 truncate">
                       {c.ficha?.nombre || "Sin nombre"}
                     </p>
-                    <p className="text-[12px] text-zinc-400 truncate">{c.ficha?.cliente?.nombre || "Sin cliente"}</p>
+                    <p className="text-[12px] text-slate-500 dark:text-zinc-400 truncate">
+                      {c.ficha?.cliente?.nombre || "Sin cliente"}
+                    </p>
                   </div>
                   <span
                     className={`ml-auto shrink-0 rounded-full px-2.5 py-[3px] font-mono text-[10.5px] font-medium border ${
                       c.estado === "confirmada"
-                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/25"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/25"
                         : c.estado === "atendida"
-                        ? "bg-white/5 text-zinc-400 border-white/10"
-                        : "bg-amber-500/15 text-amber-400 border-amber-500/25"
+                        ? "bg-slate-100 text-slate-600 border-slate-200 dark:bg-white/5 dark:text-zinc-400 dark:border-white/10"
+                        : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/25"
                     }`}
                   >
                     {c.estado}
@@ -304,12 +310,11 @@ export default async function HomePage() {
 
         {/* Panel lateral */}
         <div className="flex flex-col gap-5">
-          {/* Alertas */}
           {(productosMinimo > 0 || recordatoriosAbiertos > 0) && (
-            <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10">
-              <div className="px-4 py-3 border-b border-amber-500/20">
-                <p className="flex items-center gap-1.5 text-[13px] font-semibold text-amber-300">
-                  <Icon name="warning" size={16} className="text-amber-400" />
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 dark:border-amber-500/25 dark:bg-amber-500/10">
+              <div className="px-4 py-3 border-b border-amber-200 dark:border-amber-500/20">
+                <p className="flex items-center gap-1.5 text-[13px] font-semibold text-amber-800 dark:text-amber-300">
+                  <Icon name="warning" size={16} className="text-amber-600 dark:text-amber-400" />
                   Alertas pendientes
                 </p>
               </div>
@@ -317,18 +322,18 @@ export default async function HomePage() {
                 {productosMinimo > 0 && (
                   <Link
                     href="/inventario"
-                    className="flex items-center gap-2.5 text-[12.5px] text-amber-200/90 hover:text-amber-300 transition-colors"
+                    className="flex items-center gap-2.5 text-[12.5px] text-amber-900 hover:text-amber-700 dark:text-amber-200/90 dark:hover:text-amber-300 transition-colors"
                   >
-                    <Icon name="inventory_2" size={15} className="text-amber-400" />
+                    <Icon name="inventory_2" size={15} className="text-amber-600 dark:text-amber-400" />
                     <span>{productosMinimo} producto{productosMinimo !== 1 ? "s" : ""} bajo stock mínimo</span>
                   </Link>
                 )}
                 {recordatoriosAbiertos > 0 && (
                   <Link
                     href="/recordatorios"
-                    className="flex items-center gap-2.5 text-[12.5px] text-amber-200/90 hover:text-amber-300 transition-colors"
+                    className="flex items-center gap-2.5 text-[12.5px] text-amber-900 hover:text-amber-700 dark:text-amber-200/90 dark:hover:text-amber-300 transition-colors"
                   >
-                    <Icon name="notifications" size={15} className="text-amber-400" />
+                    <Icon name="notifications" size={15} className="text-amber-600 dark:text-amber-400" />
                     <span>{recordatoriosAbiertos} recordatorio{recordatoriosAbiertos !== 1 ? "s" : ""} sin completar</span>
                   </Link>
                 )}
@@ -337,27 +342,27 @@ export default async function HomePage() {
           )}
 
           {/* Próximas citas / turnos */}
-          <div className="rounded-2xl border border-white/10 bg-zinc-900/70 backdrop-blur-sm">
-            <div className="px-4 py-3 border-b border-white/10">
-              <p className="text-[13px] font-semibold text-zinc-100">{dicc.proximasCitas}</p>
+          <div className="rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-zinc-900/70 backdrop-blur-sm">
+            <div className="px-4 py-3 border-b border-slate-100 dark:border-white/10">
+              <p className="text-[13px] font-semibold text-slate-900 dark:text-zinc-100">{dicc.proximasCitas}</p>
             </div>
             {citasProximas.length === 0 ? (
-              <p className="px-4 py-6 text-center text-[12px] text-zinc-500">{dicc.sinProximas}</p>
+              <p className="px-4 py-6 text-center text-[12px] text-slate-400 dark:text-zinc-500">{dicc.sinProximas}</p>
             ) : (
               <div className="p-3 flex flex-col gap-1">
                 {citasProximas.map((c) => (
                   <Link
                     key={c.id}
                     href="/agenda"
-                    className="flex flex-col rounded-lg px-3 py-2 hover:bg-white/5 transition-colors"
+                    className="flex flex-col rounded-lg px-3 py-2 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-[13px] font-medium text-zinc-100">{c.ficha?.nombre || "Sin nombre"}</span>
-                      <span className="font-mono text-[11.5px] text-emerald-400">
+                      <span className="text-[13px] font-medium text-slate-900 dark:text-zinc-100">{c.ficha?.nombre || "Sin nombre"}</span>
+                      <span className="font-mono text-[11.5px] text-emerald-600 dark:text-emerald-400">
                         {c.fecha.toLocaleDateString("es-CO", { day: "2-digit", month: "short" })}
                       </span>
                     </div>
-                    <span className="text-[12px] text-zinc-400">{c.ficha?.cliente?.nombre || "Sin cliente"}</span>
+                    <span className="text-[12px] text-slate-500 dark:text-zinc-400">{c.ficha?.cliente?.nombre || "Sin cliente"}</span>
                   </Link>
                 ))}
               </div>
@@ -365,9 +370,9 @@ export default async function HomePage() {
           </div>
 
           {/* Acceso rápido */}
-          <div className="rounded-2xl border border-white/10 bg-zinc-900/70 backdrop-blur-sm">
-            <div className="px-4 py-3 border-b border-white/10">
-              <p className="text-[13px] font-semibold text-zinc-100">Acceso rápido</p>
+          <div className="rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-zinc-900/70 backdrop-blur-sm">
+            <div className="px-4 py-3 border-b border-slate-100 dark:border-white/10">
+              <p className="text-[13px] font-semibold text-slate-900 dark:text-zinc-100">Acceso rápido</p>
             </div>
             <div className="grid grid-cols-2 gap-2 p-3">
               {[
@@ -381,10 +386,10 @@ export default async function HomePage() {
                   <Link
                     key={a.href}
                     href={a.href}
-                    className="group flex flex-col items-center gap-2 rounded-xl border border-white/5 bg-white/[0.03] py-3.5 px-2 text-center hover:border-emerald-500/35 hover:bg-emerald-500/10 transition-all"
+                    className="group flex flex-col items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/70 dark:border-white/5 dark:bg-white/[0.03] py-3.5 px-2 text-center hover:border-emerald-500/40 hover:bg-emerald-50/60 dark:hover:bg-emerald-500/10 transition-all"
                   >
-                    <Icon name={a.icon} size={22} className="text-emerald-400 group-hover:scale-105 transition-transform" />
-                    <span className="text-[12px] text-zinc-300 group-hover:text-white">{a.label}</span>
+                    <Icon name={a.icon} size={22} className="text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
+                    <span className="text-[12px] text-slate-700 dark:text-zinc-300 group-hover:text-slate-950 dark:group-hover:text-white">{a.label}</span>
                   </Link>
                 ))}
             </div>

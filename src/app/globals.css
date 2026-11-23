@@ -1,16 +1,26 @@
 ﻿@import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-/* Teal accent para selects, checkboxes, radios y range */
+:root {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+/* Emerald accent para selects, checkboxes, radios y range */
 select,
 input[type="checkbox"],
 input[type="radio"],
 input[type="range"] {
-  accent-color: #1E3A6E;
+  accent-color: #10b981;
 }
 
 .material-symbols-outlined {
@@ -26,4 +36,173 @@ input[type="range"] {
   direction: ltr;
   -webkit-font-feature-settings: "liga";
   -webkit-font-smoothing: antialiased;
+}
+
+/* =====================================================================
+   SISTEMA DUAL OMNISYNC (CLARO / OSCURO) PARA TODAS LAS PÁGINAS INTERNAS
+   Solo aplica en pantalla; la impresión (PDF/Facturas) sigue en blanco.
+   ===================================================================== */
+@media screen {
+  /* ── Identidad OmniSync en ambos modos: reemplaza el azul marino viejo por esmeralda ── */
+  .omni-dashboard .bg-\[\#1E3A6E\] {
+    background-color: #059669;
+    color: #ffffff;
+  }
+  .omni-dashboard .hover\:bg-\[\#162D57\]:hover,
+  .omni-dashboard .bg-\[\#1E3A6E\]:hover {
+    background-color: #047857;
+  }
+  .omni-dashboard .text-\[\#1E3A6E\] {
+    color: #059669;
+  }
+  .omni-dashboard .border-\[\#1E3A6E\],
+  .omni-dashboard .focus\:border-\[\#1E3A6E\]:focus,
+  .omni-dashboard .hover\:border-\[\#1E3A6E\]:hover {
+    border-color: #10b981;
+  }
+  .omni-dashboard .bg-\[\#E8EEFB\] {
+    background-color: #d1fae5;
+  }
+
+  /* ── Formularios nítidos en MODO CLARO ── */
+  html:not(.dark) .omni-dashboard input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  html:not(.dark) .omni-dashboard select,
+  html:not(.dark) .omni-dashboard textarea {
+    color: #0f172a;
+    color-scheme: light;
+  }
+  html:not(.dark) .omni-dashboard input::placeholder,
+  html:not(.dark) .omni-dashboard textarea::placeholder {
+    color: #94a3b8;
+  }
+
+  /* ── Transformación automática de páginas internas en MODO OSCURO ── */
+  html.dark .omni-dashboard .bg-white:not([class*="dark:bg-"]) {
+    background-color: #18181b;
+  }
+  html.dark .omni-dashboard .bg-\[\#F8FAFC\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#F1F5F9\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#F4F6F8\]:not([class*="dark:bg-"]) {
+    background-color: #111315;
+  }
+  html.dark .omni-dashboard .hover\:bg-\[\#F8FAFC\]:hover:not([class*="dark:hover:bg-"]),
+  html.dark .omni-dashboard .hover\:bg-\[\#F1F5F9\]:hover:not([class*="dark:hover:bg-"]) {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  /* Bordes y separadores en modo oscuro */
+  html.dark .omni-dashboard .border-\[\#E2E8F0\]:not([class*="dark:border-"]),
+  html.dark .omni-dashboard .border-\[\#EEF2F6\]:not([class*="dark:border-"]),
+  html.dark .omni-dashboard .border-\[\#F1F5F9\]:not([class*="dark:border-"]),
+  html.dark .omni-dashboard .border-\[\#CBD5E1\]:not([class*="dark:border-"]) {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  html.dark .omni-dashboard [style*="border-bottom: 1px solid"],
+  html.dark .omni-dashboard [style*="border-top: 1px solid"],
+  html.dark .omni-dashboard [style*="border: 1px solid"] {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  /* Textos y títulos visibles en modo oscuro */
+  html.dark .omni-dashboard .text-\[\#0F1720\]:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-\[\#0F172A\]:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-slate-900:not([class*="dark:text-"]) {
+    color: #f4f4f5;
+  }
+  html.dark .omni-dashboard .text-\[\#334155\]:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-\[\#475569\]:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-slate-700:not([class*="dark:text-"]) {
+    color: #d4d4d8;
+  }
+  html.dark .omni-dashboard .text-\[\#64748B\]:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-\[\#7C8CA0\]:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-slate-500:not([class*="dark:text-"]) {
+    color: #a1a1aa;
+  }
+  html.dark .omni-dashboard .text-\[\#94A3B8\]:not([class*="dark:text-"]) {
+    color: #71717a;
+  }
+
+  /* Acentos y badges en modo oscuro */
+  html.dark .omni-dashboard .bg-\[\#1E3A6E\] {
+    background-color: #10b981;
+    color: #090d0c;
+    font-weight: 700;
+  }
+  html.dark .omni-dashboard .bg-\[\#1E3A6E\] .material-symbols-outlined {
+    color: #090d0c;
+  }
+  html.dark .omni-dashboard .hover\:bg-\[\#162D57\]:hover,
+  html.dark .omni-dashboard .bg-\[\#1E3A6E\]:hover {
+    background-color: #34d399;
+  }
+  html.dark .omni-dashboard .text-\[\#1E3A6E\] {
+    color: #34d399;
+  }
+  html.dark .omni-dashboard .bg-\[\#E8EEFB\] {
+    background-color: rgba(16, 185, 129, 0.16);
+  }
+  html.dark .omni-dashboard .bg-\[\#EDE9FE\] {
+    background-color: rgba(139, 92, 246, 0.18);
+  }
+  html.dark .omni-dashboard .text-\[\#7C3AED\] {
+    color: #c4b5fd;
+  }
+  html.dark .omni-dashboard .bg-\[\#D1FAE5\] {
+    background-color: rgba(16, 185, 129, 0.18);
+  }
+  html.dark .omni-dashboard .text-\[\#059669\] {
+    color: #34d399;
+  }
+  html.dark .omni-dashboard .bg-\[\#FEF3C7\],
+  html.dark .omni-dashboard .bg-\[\#FFFBEB\] {
+    background-color: rgba(245, 158, 11, 0.14);
+  }
+  html.dark .omni-dashboard .text-\[\#B45309\],
+  html.dark .omni-dashboard .text-\[\#78350F\] {
+    color: #fbbf24;
+  }
+  html.dark .omni-dashboard .border-\[\#FDE68A\] {
+    border-color: rgba(245, 158, 11, 0.3);
+  }
+  html.dark .omni-dashboard .bg-\[\#DBEAFE\] {
+    background-color: rgba(56, 189, 248, 0.16);
+  }
+  html.dark .omni-dashboard .text-\[\#2563EB\] {
+    color: #38bdf8;
+  }
+  html.dark .omni-dashboard .bg-\[\#FEE2E2\] {
+    background-color: rgba(239, 68, 68, 0.16);
+  }
+  html.dark .omni-dashboard .text-\[\#DC2626\] {
+    color: #f87171;
+  }
+
+  /* Formularios, selects, fechas y tablas nítidos en MODO OSCURO */
+  html.dark .omni-dashboard input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  html.dark .omni-dashboard select,
+  html.dark .omni-dashboard textarea {
+    background-color: #090d0c;
+    border-color: rgba(255, 255, 255, 0.14);
+    color: #f4f4f5;
+    color-scheme: dark;
+  }
+  html.dark .omni-dashboard input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+  html.dark .omni-dashboard select:focus,
+  html.dark .omni-dashboard textarea:focus {
+    border-color: #10b981;
+    outline: none;
+  }
+  html.dark .omni-dashboard input::placeholder,
+  html.dark .omni-dashboard textarea::placeholder {
+    color: #71717a;
+  }
+  html.dark .omni-dashboard select option {
+    background-color: #18181b;
+    color: #f4f4f5;
+  }
+  html.dark .omni-dashboard table th,
+  html.dark .omni-dashboard table td {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
 }

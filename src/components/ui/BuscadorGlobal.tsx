@@ -120,15 +120,15 @@ export function BuscadorGlobal({ tipoNegocio = "veterinaria" }: { tipoNegocio?: 
   const lista = (
     <div className="max-h-[70vh] overflow-y-auto py-1">
       {!buscando ? (
-        <p className="px-4 py-3 text-[13px] text-zinc-500">{textos.ayuda}</p>
+        <p className="px-4 py-3 text-[13px] text-slate-500 dark:text-zinc-500">{textos.ayuda}</p>
       ) : cargando && items.length === 0 ? (
-        <p className="px-4 py-3 text-[13px] text-zinc-500">Buscando…</p>
+        <p className="px-4 py-3 text-[13px] text-slate-500 dark:text-zinc-500">Buscando…</p>
       ) : items.length === 0 ? (
-        <p className="px-4 py-3 text-[13px] text-zinc-400">Sin resultados para “{q.trim()}”.</p>
+        <p className="px-4 py-3 text-[13px] text-slate-600 dark:text-zinc-400">Sin resultados para “{q.trim()}”.</p>
       ) : (
         grupos.map((g) => (
           <div key={g.titulo} className="py-1">
-            <p className="px-4 pt-2 pb-1 font-mono text-[10.5px] tracking-[0.1em] text-zinc-500 uppercase">{g.titulo}</p>
+            <p className="px-4 pt-2 pb-1 font-mono text-[10.5px] tracking-[0.1em] text-slate-400 dark:text-zinc-500 uppercase">{g.titulo}</p>
             {g.items.map((item) => {
               const indice = items.indexOf(item)
               return (
@@ -138,13 +138,15 @@ export function BuscadorGlobal({ tipoNegocio = "veterinaria" }: { tipoNegocio?: 
                   onMouseEnter={() => setActivo(indice)}
                   onClick={() => ir(item)}
                   className={`flex w-full items-center gap-3 px-4 py-2 text-left transition-colors ${
-                    indice === activo ? "bg-emerald-500/15" : "hover:bg-white/5"
+                    indice === activo
+                      ? "bg-emerald-50 dark:bg-emerald-500/15"
+                      : "hover:bg-slate-50 dark:hover:bg-white/5"
                   }`}
                 >
-                  <Icon name={item.icono} size={18} className="text-emerald-400 shrink-0" />
+                  <Icon name={item.icono} size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span className="min-w-0">
-                    <span className="block truncate text-[13.5px] font-medium text-zinc-100">{item.titulo}</span>
-                    <span className="block truncate text-[12px] text-zinc-400">{item.detalle}</span>
+                    <span className="block truncate text-[13.5px] font-medium text-slate-900 dark:text-zinc-100">{item.titulo}</span>
+                    <span className="block truncate text-[12px] text-slate-500 dark:text-zinc-400">{item.detalle}</span>
                   </span>
                 </button>
               )
@@ -157,10 +159,9 @@ export function BuscadorGlobal({ tipoNegocio = "veterinaria" }: { tipoNegocio?: 
 
   return (
     <>
-      {/* Escritorio y tablet */}
       <div ref={cajaRef} className="relative hidden md:block flex-1 max-w-[440px]">
-        <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/40 px-3 py-[7px] focus-within:border-emerald-500/70 focus-within:bg-black/60 transition-colors">
-          <Icon name="search" size={18} className="text-zinc-500 shrink-0" />
+        <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-[7px] focus-within:border-emerald-500 focus-within:bg-white dark:border-white/10 dark:bg-black/40 dark:focus-within:border-emerald-500/70 dark:focus-within:bg-black/60 transition-colors">
+          <Icon name="search" size={18} className="text-slate-400 dark:text-zinc-500 shrink-0" />
           <input
             ref={inputRef}
             type="search"
@@ -170,36 +171,35 @@ export function BuscadorGlobal({ tipoNegocio = "veterinaria" }: { tipoNegocio?: 
             onKeyDown={alPresionar}
             placeholder={textos.placeholder}
             aria-label="Buscar en todo el sistema"
-            className="flex-1 bg-transparent text-[13px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+            className="flex-1 !border-0 !bg-transparent text-[13px] text-slate-800 placeholder:text-slate-400 dark:text-zinc-100 dark:placeholder:text-zinc-500 focus:outline-none"
           />
-          <span className="shrink-0 rounded border border-white/10 bg-white/5 px-1.5 py-px font-mono text-[11px] text-zinc-500">
+          <span className="shrink-0 rounded border border-slate-200 bg-white px-1.5 py-px font-mono text-[11px] text-slate-400 dark:border-white/10 dark:bg-white/5 dark:text-zinc-500">
             Ctrl K
           </span>
         </div>
         {abierto && (
-          <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-xl border border-white/10 bg-zinc-900 shadow-2xl">
+          <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-zinc-900 shadow-2xl">
             {lista}
           </div>
         )}
       </div>
 
-      {/* Celular: lupa que abre el buscador a pantalla completa */}
       <button
         type="button"
         onClick={() => {
           setMovil(true)
           setTimeout(() => inputMovilRef.current?.focus(), 50)
         }}
-        className="flex items-center justify-center rounded-lg border border-white/10 bg-white/5 p-2 text-zinc-200 hover:bg-white/10 md:hidden"
+        className="flex items-center justify-center rounded-lg border border-slate-200 bg-slate-50 p-2 text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10 md:hidden"
         aria-label="Buscar"
       >
         <Icon name="search" size={20} />
       </button>
       {movil && (
-        <div className="fixed inset-0 z-[60] flex flex-col bg-zinc-950 md:hidden">
-          <div className="flex items-center gap-2 border-b border-white/10 p-3">
-            <div className="flex flex-1 items-center gap-2 rounded-lg border border-emerald-500/60 bg-black/50 px-3 py-2">
-              <Icon name="search" size={18} className="text-zinc-500 shrink-0" />
+        <div className="fixed inset-0 z-[60] flex flex-col bg-white dark:bg-zinc-950 md:hidden">
+          <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/10 p-3">
+            <div className="flex flex-1 items-center gap-2 rounded-lg border border-emerald-500 bg-slate-50 dark:bg-black/50 px-3 py-2">
+              <Icon name="search" size={18} className="text-slate-400 dark:text-zinc-500 shrink-0" />
               <input
                 ref={inputMovilRef}
                 type="search"
@@ -208,13 +208,13 @@ export function BuscadorGlobal({ tipoNegocio = "veterinaria" }: { tipoNegocio?: 
                 onKeyDown={alPresionar}
                 placeholder={textos.placeholder}
                 aria-label="Buscar en todo el sistema"
-                className="flex-1 bg-transparent text-[15px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+                className="flex-1 !border-0 !bg-transparent text-[15px] text-slate-900 placeholder:text-slate-400 dark:text-zinc-100 dark:placeholder:text-zinc-500 focus:outline-none"
               />
             </div>
             <button
               type="button"
               onClick={() => setMovil(false)}
-              className="rounded-lg px-3 py-2 text-[14px] text-emerald-400 hover:bg-white/5"
+              className="rounded-lg px-3 py-2 text-[14px] text-emerald-600 dark:text-emerald-400 hover:bg-slate-100 dark:hover:bg-white/5"
             >
               Cerrar
             </button>
