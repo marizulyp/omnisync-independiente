@@ -179,7 +179,7 @@ input[type="range"] {
   }
 
   /* Formularios, selects, fechas y tablas nítidos en MODO OSCURO */
-  html.dark .omni-dashboard input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  html.dark .omni-dashboard input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([aria-label="Buscar en todo el sistema"]),
   html.dark .omni-dashboard select,
   html.dark .omni-dashboard textarea {
     background-color: #090d0c;
@@ -187,7 +187,7 @@ input[type="range"] {
     color: #f4f4f5;
     color-scheme: dark;
   }
-  html.dark .omni-dashboard input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+  html.dark .omni-dashboard input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([aria-label="Buscar en todo el sistema"]):focus,
   html.dark .omni-dashboard select:focus,
   html.dark .omni-dashboard textarea:focus {
     border-color: #10b981;
