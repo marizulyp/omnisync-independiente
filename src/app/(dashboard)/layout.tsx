@@ -13,48 +13,89 @@ import { crearLogo } from "@/lib/logo"
 
 type NavItem = { href: string; label: string; icon: string; visible: boolean }
 
-// 1. DICCIONARIO CAMALEÓN AMPLIADO
-const DICCIONARIO: Record<string, { fichas: string; fichasIcon: string; atenciones: string; recomendaciones: string; botonAtencion: string }> = {
-  veterinaria: { fichas: "Pacientes", fichasIcon: "pets", atenciones: "Historia Clínica", recomendaciones: "Fórmulas", botonAtencion: "Nueva atención" },
-  taller: { fichas: "Vehículos", fichasIcon: "directions_car", atenciones: "Órdenes de Trabajo", recomendaciones: "Recomendaciones", botonAtencion: "Nueva orden" },
-  barberia: { fichas: "Fichas/Clientes", fichasIcon: "face", atenciones: "Historial de Servicios", recomendaciones: "Fórmulas Capilares", botonAtencion: "Nuevo servicio" },
-  medico: { fichas: "Pacientes", fichasIcon: "personal_injury", atenciones: "Historia Clínica", recomendaciones: "Recetas Médicas", botonAtencion: "Nueva atención" },
+const DICCIONARIO: Record<
+  string,
+  {
+    fichas: string
+    fichasIcon: string
+    atenciones: string
+    recomendaciones: string
+    botonAtencion: string
+    botonCita: string
+  }
+> = {
+  veterinaria: {
+    fichas: "Pacientes",
+    fichasIcon: "pets",
+    atenciones: "Historia Clínica",
+    recomendaciones: "Fórmulas",
+    botonAtencion: "Nueva atención",
+    botonCita: "Nueva cita",
+  },
+  taller: {
+    fichas: "Vehículos",
+    fichasIcon: "directions_car",
+    atenciones: "Órdenes de Trabajo",
+    recomendaciones: "Recomendaciones",
+    botonAtencion: "Nueva orden",
+    botonCita: "Nueva revisión",
+  },
+  barberia: {
+    fichas: "Fichas/Clientes",
+    fichasIcon: "face",
+    atenciones: "Historial de Servicios",
+    recomendaciones: "Fórmulas Capilares",
+    botonAtencion: "Nuevo servicio",
+    botonCita: "Nuevo turno",
+  },
+  medico: {
+    fichas: "Pacientes",
+    fichasIcon: "personal_injury",
+    atenciones: "Historia Clínica",
+    recomendaciones: "Recetas Médicas",
+    botonAtencion: "Nueva atención",
+    botonCita: "Nueva cita",
+  },
 }
 
-// 2. FILTRO INTELIGENTE CON MÓDULOS ACTIVOS
 function navPorConfiguracion(rol: string, tipoNegocio: string, modulosActivos: string[]) {
-  const nombres = DICCIONARIO[tipoNegocio] || DICCIONARIO["veterinaria"];
+  const nombres = DICCIONARIO[tipoNegocio] || DICCIONARIO["veterinaria"]
 
   const puede = <M extends Modulo>(modulo: M, accion: Accion<M>) => {
-    const tienePermisoRol = tienePermiso(rol, modulo, accion);
-    
-    // Lista de los módulos opcionales que se eligen al registrarse
-    const esOpcional = ["agenda", "fichas", "atenciones", "inventario", "finanzas"].includes(modulo);
-    
-    // Si es opcional, verificamos que la empresa lo haya comprado/seleccionado
-    const negocioTieneModulo = esOpcional ? modulosActivos.includes(modulo) : true;
-    
-    return tienePermisoRol && negocioTieneModulo;
+    const tienePermisoRol = tienePermiso(rol, modulo, accion)
+    const esOpcional = ["agenda", "fichas", "atenciones", "inventario", "finanzas"].includes(modulo)
+    const negocioTieneModulo = esOpcional ? modulosActivos.includes(modulo) : true
+    return tienePermisoRol && negocioTieneModulo
   }
-  
+
   const verFinanzas = puede("finanzas", "ver")
 
   const operacionBase: NavItem[] = [
     { href: "/", label: "Inicio", icon: "space_dashboard", visible: true },
     { href: "/agenda", label: "Agenda", icon: "calendar_month", visible: puede("agenda", "ver") },
     { href: "/fichas", label: nombres.fichas, icon: nombres.fichasIcon, visible: puede("fichas", "ver") },
-    { href: "/clientes", label: "Clientes", icon: "group", visible: true }, // Clientes siempre es visible
+    { href: "/clientes", label: "Clientes", icon: "group", visible: true },
     { href: "/atenciones", label: nombres.atenciones, icon: "clinical_notes", visible: puede("atenciones", "ver") },
-    { href: "/recomendaciones", label: nombres.recomendaciones, icon: "prescriptions", visible: puede("atenciones", "ver") && tienePermiso(rol, "recomendaciones" as any, "ver") },
+    {
+      href: "/recomendaciones",
+      label: nombres.recomendaciones,
+      icon: "prescriptions",
+      visible: puede("atenciones", "ver") && tienePermiso(rol, "recomendaciones" as any, "ver"),
+    },
   ]
 
   const operacionFinanzas: NavItem[] = [
     { href: "/inventario", label: "Inventario", icon: "inventory_2", visible: puede("inventario", "ver") },
-    { href: "/facturas", label: "Facturas", icon: "receipt_long", visible: puede("finanzas", "ver") }, 
+    { href: "/facturas", label: "Facturas", icon: "receipt_long", visible: puede("finanzas", "ver") },
     verFinanzas
       ? { href: "/finanzas", label: "Finanzas", icon: "account_balance_wallet", visible: true }
-      : { href: "/finanzas/cobros", label: "Cobros", icon: "account_balance_wallet", visible: tienePermiso(rol, "cobros" as any, "ver") && modulosActivos.includes("finanzas") },
-    { href: "/recordatorios", label: "Recordatorios", icon: "notifications", visible: true }, 
+      : {
+          href: "/finanzas/cobros",
+          label: "Cobros",
+          icon: "account_balance_wallet",
+          visible: tienePermiso(rol, "cobros" as any, "ver") && modulosActivos.includes("finanzas"),
+        },
+    { href: "/recordatorios", label: "Recordatorios", icon: "notifications", visible: true },
   ]
 
   const admin: NavItem[] = [
@@ -75,40 +116,44 @@ const ROL_LABEL: Record<string, string> = {
 }
 
 function getIniciales(nombre: string) {
-  return nombre.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("")
+  return nombre
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("")
 }
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
   if (!session) redirect("/login")
 
-  // 3. EXTRACCIÓN SEGURA DIRECTO DE LA BASE DE DATOS
   const usuarioDb = await prisma.usuario.findUnique({
     where: { email: session.user.email ?? "" },
-    include: { negocio: true }
-  });
+    include: { negocio: true },
+  })
 
-  const negocio = usuarioDb?.negocio;
-  const negocioId = negocio?.id;
-  const tipoNegocio = negocio?.tipoNegocio || "veterinaria";
-  const modulosActivos = negocio?.modulosActivos || [];
-  const nombreNegocio = negocio?.nombre || "Mi Negocio";
-  const logoNegocio = negocio?.logoUrl || crearLogo(nombreNegocio);
+  const negocio = usuarioDb?.negocio
+  const negocioId = negocio?.id
+  const tipoNegocio = negocio?.tipoNegocio || "veterinaria"
+  const modulosActivos = negocio?.modulosActivos || []
+  const nombreNegocio = negocio?.nombre || "Mi Negocio"
+  const logoNegocio = negocio?.logoUrl || crearLogo(nombreNegocio, tipoNegocio, "dark")
 
-  // 4. APLICAR FILTROS AL MENÚ
   const nav = navPorConfiguracion(session.user.rol ?? "asistente", tipoNegocio, modulosActivos)
-  const dicc = DICCIONARIO[tipoNegocio] || DICCIONARIO["veterinaria"];
+  const dicc = DICCIONARIO[tipoNegocio] || DICCIONARIO["veterinaria"]
 
   const ahora = new Date()
   const inicioHoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate())
   const finHoy = new Date(inicioHoy.getTime() + 24 * 60 * 60 * 1000 - 1)
   const en7dias = new Date(inicioHoy.getTime() + 7 * 24 * 60 * 60 * 1000)
 
-  // 5. BLINDAMOS LAS ALERTAS DEL SIDEBAR (Globitos de colores)
   const [productos, recordatoriosPendientes, citasHoyCount, controlesCount] = await Promise.all([
     prisma.producto.findMany({ where: { negocioId }, select: { stock: true, stockMinimo: true } }),
     prisma.recordatorio.count({ where: { negocioId, completado: false } }),
-    prisma.cita.count({ where: { negocioId, fecha: { gte: inicioHoy, lte: finHoy }, estado: { notIn: ["cancelada", "atendida"] } } }),
+    prisma.cita.count({
+      where: { negocioId, fecha: { gte: inicioHoy, lte: finHoy }, estado: { notIn: ["cancelada", "atendida"] } },
+    }),
     prisma.controlPreventivo.count({ where: { ficha: { negocioId }, proximaFecha: { not: null, lte: en7dias } } }),
   ])
   const productosMinimo = productos.filter((p) => p.stockMinimo > 0 && p.stock <= p.stockMinimo).length
@@ -123,16 +168,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const menu = (
     <>
-      <div className="px-[14px] pt-5 pb-5 flex flex-col items-center" style={{ borderBottom: "1px solid #EEF2F6" }}>
+      <div className="px-[14px] pt-4 pb-4 flex flex-col items-center border-b border-white/10">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={logoNegocio} alt={nombreNegocio} style={{ width: 200, height: 150, objectFit: "contain" }} />
+        <img src={logoNegocio} alt={nombreNegocio} style={{ width: 200, height: 142, objectFit: "contain" }} />
       </div>
 
       <nav className="flex-1 overflow-y-auto px-[10px] py-3">
         {nav.clinica.length > 0 && (
           <>
-            <p className="mx-3 mt-2.5 mb-1.5 font-mono text-[10px] tracking-[0.12em] text-[#94A3B8] uppercase">Atención</p>
-            <div className="flex flex-col gap-[1px]">
+            <p className="mx-3 mt-2.5 mb-1.5 font-mono text-[10px] tracking-[0.12em] text-zinc-500 uppercase">Atención</p>
+            <div className="flex flex-col gap-1">
               {nav.clinica.map((item) => (
                 <NavLink key={item.href} href={item.href} icon={item.icon} label={item.label} />
               ))}
@@ -142,10 +187,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
         {nav.operacion.length > 0 && (
           <>
-            <p className="mx-3 mt-4 mb-1.5 font-mono text-[10px] tracking-[0.12em] text-[#94A3B8] uppercase">Operación</p>
-            <div className="flex flex-col gap-[1px]">
+            <p className="mx-3 mt-4 mb-1.5 font-mono text-[10px] tracking-[0.12em] text-zinc-500 uppercase">Operación</p>
+            <div className="flex flex-col gap-1">
               {nav.operacion.map((item) => (
-                <NavLink key={item.href} href={item.href} icon={item.icon} label={item.label} badge={item.href === "/inventario" ? productosMinimo : item.href === "/recordatorios" ? alertasRecordatorios : undefined} />
+                <NavLink
+                  key={item.href}
+                  href={item.href}
+                  icon={item.icon}
+                  label={item.label}
+                  badge={item.href === "/inventario" ? productosMinimo : item.href === "/recordatorios" ? alertasRecordatorios : undefined}
+                />
               ))}
             </div>
           </>
@@ -153,8 +204,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
         {nav.admin.length > 0 && (
           <>
-            <p className="mx-3 mt-4 mb-1.5 font-mono text-[10px] tracking-[0.12em] text-[#94A3B8] uppercase">Administración</p>
-            <div className="flex flex-col gap-[1px]">
+            <p className="mx-3 mt-4 mb-1.5 font-mono text-[10px] tracking-[0.12em] text-zinc-500 uppercase">Administración</p>
+            <div className="flex flex-col gap-1">
               {nav.admin.map((item) => (
                 <NavLink key={item.href} href={item.href} icon={item.icon} label={item.label} />
               ))}
@@ -163,17 +214,21 @@ export default async function DashboardLayout({ children }: { children: React.Re
         )}
       </nav>
 
-      <div className="p-3" style={{ borderTop: "1px solid #EEF2F6" }}>
+      <div className="p-3 border-t border-white/10">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-semibold text-[12.5px]" style={{ backgroundColor: "#E8EEFB", color: "#1E3A6E" }}>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-500/30 bg-emerald-500/15 font-semibold text-[12.5px] text-emerald-400">
             {iniciales}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-medium text-[#0F1720]">{session.user.name}</p>
-            <p className="text-[11.5px] text-[#94A3B8]">{ROL_LABEL[session.user.rol ?? ""] ?? session.user.rol}</p>
+            <p className="truncate text-[13px] font-medium text-zinc-100">{session.user.name}</p>
+            <p className="text-[11.5px] text-zinc-500">{ROL_LABEL[session.user.rol ?? ""] ?? session.user.rol}</p>
           </div>
           <form action={logout}>
-            <button type="submit" title="Cerrar sesión" className="flex items-center justify-center rounded p-1 text-[#94A3B8] hover:text-[#334155] transition-colors">
+            <button
+              type="submit"
+              title="Cerrar sesión"
+              className="flex items-center justify-center rounded-lg p-1.5 text-zinc-500 hover:bg-white/5 hover:text-zinc-200 transition-colors"
+            >
               <Icon name="logout" size={18} />
             </button>
           </form>
@@ -184,18 +239,24 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const encabezado = (
     <>
-      <BuscadorGlobal />
+      <BuscadorGlobal tipoNegocio={tipoNegocio} />
       <div className="ml-auto flex items-center gap-2">
         {tienePermiso(session.user.rol, "atenciones", "editar") && modulosActivos.includes("atenciones") && (
-          <Link href="/atenciones" className="flex items-center gap-[7px] rounded-[7px] border border-[#E2E8F0] bg-white px-[11px] sm:px-[13px] py-2 text-[13px] text-[#334155] hover:bg-[#F8FAFC] transition-colors">
-            <Icon name="medical_services" size={17} className="text-[#7C8CA0]" />
+          <Link
+            href="/atenciones"
+            className="flex items-center gap-[7px] rounded-lg border border-white/10 bg-white/5 px-[11px] sm:px-[13px] py-2 text-[13px] text-zinc-200 hover:bg-white/10 hover:border-white/20 transition-colors"
+          >
+            <Icon name="medical_services" size={17} className="text-emerald-400" />
             <span className="hidden sm:inline">{dicc.botonAtencion}</span>
           </Link>
         )}
         {tienePermiso(session.user.rol, "agenda", "editar") && modulosActivos.includes("agenda") && (
-          <Link href="/agenda/nueva" className="flex items-center gap-[7px] rounded-[7px] bg-[#1E3A6E] px-[11px] sm:px-[15px] py-[9px] text-[13px] font-semibold text-white hover:bg-[#162D57] transition-colors">
-            <Icon name="add" size={17} className="text-white" />
-            <span className="hidden sm:inline">Nueva cita</span>
+          <Link
+            href="/agenda/nueva"
+            className="flex items-center gap-[7px] rounded-lg bg-emerald-500 px-[11px] sm:px-[15px] py-[9px] text-[13px] font-bold text-zinc-950 hover:bg-emerald-400 shadow-[0_0_20px_-4px_rgba(16,185,129,0.5)] transition-colors"
+          >
+            <Icon name="add" size={17} className="text-zinc-950" />
+            <span className="hidden sm:inline">{dicc.botonCita}</span>
           </Link>
         )}
       </div>
