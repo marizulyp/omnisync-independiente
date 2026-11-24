@@ -39,20 +39,25 @@ input[type="range"] {
 }
 
 /* =====================================================================
-   SISTEMA DUAL OMNISYNC (CLARO / OSCURO) PARA TODAS LAS PÁGINAS INTERNAS
+   SISTEMA DUAL OMNISYNC (CLARO / OSCURO) + REDISEÑO DE FORMULARIOS
    Solo aplica en pantalla; la impresión (PDF/Facturas) sigue en blanco.
    ===================================================================== */
 @media screen {
-  /* ── Identidad OmniSync en ambos modos: reemplaza el azul marino viejo por esmeralda ── */
-  .omni-dashboard .bg-\[\#1E3A6E\] {
+  /* ── Identidad OmniSync en ambos modos (reemplaza el azul marino viejo por esmeralda) ── */
+  .omni-dashboard .bg-\[\#1E3A6E\],
+  .omni-dashboard .bg-\[\#1e3a6e\] {
     background-color: #059669;
     color: #ffffff;
+    border-color: transparent;
+    transition: background-color 150ms ease, box-shadow 150ms ease, transform 120ms ease;
   }
   .omni-dashboard .hover\:bg-\[\#162D57\]:hover,
-  .omni-dashboard .bg-\[\#1E3A6E\]:hover {
+  .omni-dashboard .bg-\[\#1E3A6E\]:hover,
+  .omni-dashboard .bg-\[\#1e3a6e\]:hover {
     background-color: #047857;
   }
-  .omni-dashboard .text-\[\#1E3A6E\] {
+  .omni-dashboard .text-\[\#1E3A6E\],
+  .omni-dashboard .text-\[\#1e3a6e\] {
     color: #059669;
   }
   .omni-dashboard .border-\[\#1E3A6E\],
@@ -64,99 +69,324 @@ input[type="range"] {
     background-color: #d1fae5;
   }
 
+  /* ── Mejora visual de formularios en AMBOS modos ── */
+  .omni-dashboard main label {
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .omni-dashboard main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  .omni-dashboard main select,
+  .omni-dashboard main textarea {
+    border-radius: 0.625rem;
+    transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+  }
+
   /* ── Formularios nítidos en MODO CLARO ── */
-  html:not(.dark) .omni-dashboard input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-  html:not(.dark) .omni-dashboard select,
-  html:not(.dark) .omni-dashboard textarea {
+  html:not(.dark) .omni-dashboard main label {
+    color: #334155;
+  }
+  html:not(.dark) .omni-dashboard main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  html:not(.dark) .omni-dashboard main select,
+  html:not(.dark) .omni-dashboard main textarea {
+    background-color: #ffffff;
+    border-color: #cbd5e1;
     color: #0f172a;
     color-scheme: light;
   }
-  html:not(.dark) .omni-dashboard input::placeholder,
-  html:not(.dark) .omni-dashboard textarea::placeholder {
+  html:not(.dark) .omni-dashboard main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+  html:not(.dark) .omni-dashboard main select:focus,
+  html:not(.dark) .omni-dashboard main textarea:focus {
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.14);
+    outline: none;
+  }
+  html:not(.dark) .omni-dashboard main input::placeholder,
+  html:not(.dark) .omni-dashboard main textarea::placeholder {
     color: #94a3b8;
   }
+  html:not(.dark) .omni-dashboard main form.bg-white,
+  html:not(.dark) .omni-dashboard main .bg-white:has(> form) {
+    box-shadow: 0 8px 28px -12px rgba(15, 23, 42, 0.08);
+  }
 
-  /* ── Transformación automática de páginas internas en MODO OSCURO ── */
-  html.dark .omni-dashboard .bg-white:not([class*="dark:bg-"]) {
-    background-color: #18181b;
+  /* ===================================================================
+     MODO OSCURO COMPLETO (100% oscuro y alto contraste en toda la app)
+     =================================================================== */
+
+  /* 1. Títulos y encabezados siempre visibles */
+  html.dark .omni-dashboard main h1:not([class*="dark:text-"]),
+  html.dark .omni-dashboard main h2:not([class*="dark:text-"]),
+  html.dark .omni-dashboard main h3:not([class*="dark:text-"]) {
+    color: #f4f4f5 !important;
   }
+
+  /* 2. Etiquetas de formulario siempre claras y legibles */
+  html.dark .omni-dashboard main label:not([class*="dark:text-"]) {
+    color: #e4e4e7 !important;
+  }
+
+  /* 3. Superficies blancas y claras -> tarjetas oscuras OmniSync */
+  html.dark .omni-dashboard .bg-white:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-slate-50:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-gray-50:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-zinc-50:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-neutral-50:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#FFFFFF\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#ffffff\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#FAFBFD\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#fafbfd\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#F9FAFB\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#f9fafb\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#FCFDFF\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#FAFAFA\]:not([class*="dark:bg-"]) {
+    background-color: #14181b;
+  }
+
+  html.dark .omni-dashboard .bg-slate-100:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-gray-100:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-zinc-100:not([class*="dark:bg-"]),
   html.dark .omni-dashboard .bg-\[\#F8FAFC\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#f8fafc\]:not([class*="dark:bg-"]),
   html.dark .omni-dashboard .bg-\[\#F1F5F9\]:not([class*="dark:bg-"]),
-  html.dark .omni-dashboard .bg-\[\#F4F6F8\]:not([class*="dark:bg-"]) {
-    background-color: #111315;
+  html.dark .omni-dashboard .bg-\[\#f1f5f9\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#F4F6F8\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#f4f6f8\]:not([class*="dark:bg-"]) {
+    background-color: #101417;
   }
+
+  /* Fondos blancos aplicados con style inline (ej. Resumen del período en Informes) */
+  html.dark .omni-dashboard main [style*="background-color: #fff" i],
+  html.dark .omni-dashboard main [style*="background-color: white" i],
+  html.dark .omni-dashboard main [style*="background-color: rgb(255, 255, 255)"],
+  html.dark .omni-dashboard main [style*="background-color: #f8fafc" i],
+  html.dark .omni-dashboard main [style*="background-color: #f1f5f9" i],
+  html.dark .omni-dashboard main [style*="background-color: #f4f6f8" i],
+  html.dark .omni-dashboard main [style*="background-color: #fafbfd" i],
+  html.dark .omni-dashboard main [style*="background-color: #f9fafb" i],
+  html.dark .omni-dashboard main [style*="background: #fff" i],
+  html.dark .omni-dashboard main [style*="background: white" i] {
+    background-color: #14181b !important;
+  }
+
   html.dark .omni-dashboard .hover\:bg-\[\#F8FAFC\]:hover:not([class*="dark:hover:bg-"]),
-  html.dark .omni-dashboard .hover\:bg-\[\#F1F5F9\]:hover:not([class*="dark:hover:bg-"]) {
+  html.dark .omni-dashboard .hover\:bg-\[\#F1F5F9\]:hover:not([class*="dark:hover:bg-"]),
+  html.dark .omni-dashboard .hover\:bg-slate-50:hover:not([class*="dark:hover:bg-"]),
+  html.dark .omni-dashboard .hover\:bg-gray-50:hover:not([class*="dark:hover:bg-"]) {
     background-color: rgba(255, 255, 255, 0.05);
   }
 
-  /* Bordes y separadores en modo oscuro */
+  /* 4. Bordes y divisores suaves en modo oscuro (elimina contornos blancos fuertes) */
+  html.dark .omni-dashboard main .border:not([class*="border-emerald"]):not([class*="border-green"]):not([class*="border-amber"]):not([class*="border-red"]):not([class*="border-cyan"]):not([class*="border-teal"]):not([class*="border-white/"]) {
+    border-color: rgba(255, 255, 255, 0.11);
+  }
+  html.dark .omni-dashboard .border-slate-100:not([class*="dark:border-"]),
+  html.dark .omni-dashboard .border-slate-200:not([class*="dark:border-"]),
+  html.dark .omni-dashboard .border-slate-300:not([class*="dark:border-"]),
+  html.dark .omni-dashboard .border-gray-100:not([class*="dark:border-"]),
+  html.dark .omni-dashboard .border-gray-200:not([class*="dark:border-"]),
+  html.dark .omni-dashboard .border-gray-300:not([class*="dark:border-"]),
+  html.dark .omni-dashboard .border-zinc-200:not([class*="dark:border-"]),
+  html.dark .omni-dashboard .border-zinc-300:not([class*="dark:border-"]),
   html.dark .omni-dashboard .border-\[\#E2E8F0\]:not([class*="dark:border-"]),
+  html.dark .omni-dashboard .border-\[\#e2e8f0\]:not([class*="dark:border-"]),
   html.dark .omni-dashboard .border-\[\#EEF2F6\]:not([class*="dark:border-"]),
   html.dark .omni-dashboard .border-\[\#F1F5F9\]:not([class*="dark:border-"]),
-  html.dark .omni-dashboard .border-\[\#CBD5E1\]:not([class*="dark:border-"]) {
-    border-color: rgba(255, 255, 255, 0.1);
+  html.dark .omni-dashboard .border-\[\#CBD5E1\]:not([class*="dark:border-"]),
+  html.dark .omni-dashboard .border-\[\#D1D5DB\]:not([class*="dark:border-"]),
+  html.dark .omni-dashboard .border-\[\#E5E7EB\]:not([class*="dark:border-"]) {
+    border-color: rgba(255, 255, 255, 0.11);
   }
   html.dark .omni-dashboard [style*="border-bottom: 1px solid"],
   html.dark .omni-dashboard [style*="border-top: 1px solid"],
+  html.dark .omni-dashboard [style*="border-left: 1px solid"],
+  html.dark .omni-dashboard [style*="border-right: 1px solid"],
   html.dark .omni-dashboard [style*="border: 1px solid"] {
     border-color: rgba(255, 255, 255, 0.1) !important;
   }
+  html.dark .omni-dashboard .divide-slate-100 > :not(:last-child),
+  html.dark .omni-dashboard .divide-slate-200 > :not(:last-child),
+  html.dark .omni-dashboard .divide-gray-100 > :not(:last-child),
+  html.dark .omni-dashboard .divide-gray-200 > :not(:last-child) {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
 
-  /* Textos y títulos visibles en modo oscuro */
+  /* 5. Textos y contrastes en modo oscuro */
+  html.dark .omni-dashboard .text-black:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-slate-900:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-slate-800:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-gray-900:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-gray-800:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-zinc-900:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-zinc-800:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-neutral-900:not([class*="dark:text-"]),
   html.dark .omni-dashboard .text-\[\#0F1720\]:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-\[\#0f1720\]:not([class*="dark:text-"]),
   html.dark .omni-dashboard .text-\[\#0F172A\]:not([class*="dark:text-"]),
-  html.dark .omni-dashboard .text-slate-900:not([class*="dark:text-"]) {
+  html.dark .omni-dashboard .text-\[\#0f172a\]:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-\[\#1E293B\]:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-\[\#111827\]:not([class*="dark:text-"]) {
     color: #f4f4f5;
   }
+
+  html.dark .omni-dashboard .text-slate-700:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-slate-600:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-gray-700:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-gray-600:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-zinc-700:not([class*="dark:text-"]),
   html.dark .omni-dashboard .text-\[\#334155\]:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-\[\#374151\]:not([class*="dark:text-"]),
   html.dark .omni-dashboard .text-\[\#475569\]:not([class*="dark:text-"]),
-  html.dark .omni-dashboard .text-slate-700:not([class*="dark:text-"]) {
+  html.dark .omni-dashboard .text-\[\#4B5563\]:not([class*="dark:text-"]) {
     color: #d4d4d8;
   }
+
+  html.dark .omni-dashboard .text-slate-500:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-gray-500:not([class*="dark:text-"]),
   html.dark .omni-dashboard .text-\[\#64748B\]:not([class*="dark:text-"]),
-  html.dark .omni-dashboard .text-\[\#7C8CA0\]:not([class*="dark:text-"]),
-  html.dark .omni-dashboard .text-slate-500:not([class*="dark:text-"]) {
+  html.dark .omni-dashboard .text-\[\#6B7280\]:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-\[\#7C8CA0\]:not([class*="dark:text-"]) {
     color: #a1a1aa;
   }
+
+  html.dark .omni-dashboard .text-slate-400:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-gray-400:not([class*="dark:text-"]),
   html.dark .omni-dashboard .text-\[\#94A3B8\]:not([class*="dark:text-"]) {
-    color: #71717a;
+    color: #8b95a5;
   }
 
-  /* Acentos y badges en modo oscuro */
-  html.dark .omni-dashboard .bg-\[\#1E3A6E\] {
+  /* 6. Tablas completas en modo oscuro (elimina las filas blancas en Registro de Actividad) */
+  html.dark .omni-dashboard table {
+    background-color: #14181b;
+    color: #e4e4e7;
+  }
+  html.dark .omni-dashboard thead,
+  html.dark .omni-dashboard thead tr,
+  html.dark .omni-dashboard thead th {
+    background-color: #0f1316 !important;
+    color: #a1a1aa !important;
+    border-color: rgba(255, 255, 255, 0.09) !important;
+  }
+  html.dark .omni-dashboard tbody tr {
+    background-color: #14181b !important;
+    color: #e4e4e7;
+  }
+  html.dark .omni-dashboard tbody tr:nth-child(even) {
+    background-color: #191e22 !important;
+  }
+  html.dark .omni-dashboard tbody tr:hover {
+    background-color: rgba(16, 185, 129, 0.08) !important;
+  }
+  html.dark .omni-dashboard tbody td {
+    border-color: rgba(255, 255, 255, 0.07) !important;
+  }
+
+  /* 7. Botones principales, secundarios y Descargar Excel en modo oscuro */
+  html.dark .omni-dashboard .bg-\[\#1E3A6E\],
+  html.dark .omni-dashboard .bg-\[\#1e3a6e\] {
     background-color: #10b981;
     color: #090d0c;
     font-weight: 700;
+    box-shadow: 0 0 20px -6px rgba(16, 185, 129, 0.5);
   }
-  html.dark .omni-dashboard .bg-\[\#1E3A6E\] .material-symbols-outlined {
+  html.dark .omni-dashboard .bg-\[\#1E3A6E\] .material-symbols-outlined,
+  html.dark .omni-dashboard .bg-\[\#1e3a6e\] .material-symbols-outlined {
     color: #090d0c;
   }
   html.dark .omni-dashboard .hover\:bg-\[\#162D57\]:hover,
-  html.dark .omni-dashboard .bg-\[\#1E3A6E\]:hover {
+  html.dark .omni-dashboard .bg-\[\#1E3A6E\]:hover,
+  html.dark .omni-dashboard .bg-\[\#1e3a6e\]:hover {
     background-color: #34d399;
   }
-  html.dark .omni-dashboard .text-\[\#1E3A6E\] {
+  html.dark .omni-dashboard .text-\[\#1E3A6E\],
+  html.dark .omni-dashboard .text-\[\#1e3a6e\] {
     color: #34d399;
   }
-  html.dark .omni-dashboard .bg-\[\#E8EEFB\] {
-    background-color: rgba(16, 185, 129, 0.16);
+
+  /* Botones secundarios dentro de formularios (Cancelar, etc.) */
+  html.dark .omni-dashboard main form button[type="button"]:not([class*="bg-emerald"]):not([class*="bg-red"]):not([class*="1E3A6E" i]),
+  html.dark .omni-dashboard main form a[class*="border"]:not([class*="bg-emerald"]):not([class*="bg-red"]):not([class*="1E3A6E" i]) {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+    color: #e4e4e7 !important;
   }
-  html.dark .omni-dashboard .bg-\[\#EDE9FE\] {
-    background-color: rgba(139, 92, 246, 0.18);
+  html.dark .omni-dashboard main form button[type="button"]:not([class*="bg-emerald"]):not([class*="bg-red"]):not([class*="1E3A6E" i]):hover,
+  html.dark .omni-dashboard main form a[class*="border"]:not([class*="bg-emerald"]):not([class*="bg-red"]):not([class*="1E3A6E" i]):hover {
+    background-color: rgba(255, 255, 255, 0.11) !important;
+    border-color: rgba(255, 255, 255, 0.28) !important;
+    color: #ffffff !important;
   }
-  html.dark .omni-dashboard .text-\[\#7C3AED\] {
-    color: #c4b5fd;
+
+  /* Botón Descargar Excel y badges verdes claros */
+  html.dark .omni-dashboard .bg-emerald-50:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-emerald-100:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-green-50:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-green-100:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#ECFDF5\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#ecfdf5\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#F0FDF4\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#f0fdf4\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#D1FAE5\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#DCFCE7\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#E8EEFB\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard main [style*="background-color: #ecfdf5" i],
+  html.dark .omni-dashboard main [style*="background-color: #f0fdf4" i],
+  html.dark .omni-dashboard main [style*="background-color: #d1fae5" i] {
+    background-color: rgba(16, 185, 129, 0.14) !important;
+    border-color: rgba(16, 185, 129, 0.32) !important;
+    color: #34d399 !important;
   }
-  html.dark .omni-dashboard .bg-\[\#D1FAE5\] {
-    background-color: rgba(16, 185, 129, 0.18);
-  }
-  html.dark .omni-dashboard .text-\[\#059669\] {
+  html.dark .omni-dashboard .text-\[\#059669\],
+  html.dark .omni-dashboard .text-\[\#047857\],
+  html.dark .omni-dashboard .text-\[\#15803D\],
+  html.dark .omni-dashboard .text-emerald-700:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-green-700:not([class*="dark:text-"]) {
     color: #34d399;
   }
-  html.dark .omni-dashboard .bg-\[\#FEF3C7\],
-  html.dark .omni-dashboard .bg-\[\#FFFBEB\] {
-    background-color: rgba(245, 158, 11, 0.14);
+
+  /* Badges rojos (Eliminar / alertas críticas) */
+  html.dark .omni-dashboard .bg-red-50:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-red-100:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-rose-50:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-rose-100:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#FEE2E2\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#FEF2F2\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard main [style*="background-color: #fee2e2" i],
+  html.dark .omni-dashboard main [style*="background-color: #fef2f2" i] {
+    background-color: rgba(239, 68, 68, 0.16) !important;
+    color: #f87171 !important;
+  }
+  html.dark .omni-dashboard .text-\[\#DC2626\],
+  html.dark .omni-dashboard .text-\[\#B91C1C\],
+  html.dark .omni-dashboard .text-red-700:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-red-600:not([class*="dark:text-"]) {
+    color: #f87171;
+  }
+
+  /* Badges azules (Editar / info) */
+  html.dark .omni-dashboard .bg-blue-50:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-blue-100:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-sky-50:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-sky-100:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#DBEAFE\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#EFF6FF\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard main [style*="background-color: #dbeafe" i],
+  html.dark .omni-dashboard main [style*="background-color: #eff6ff" i] {
+    background-color: rgba(56, 189, 248, 0.16) !important;
+    color: #38bdf8 !important;
+  }
+  html.dark .omni-dashboard .text-\[\#2563EB\],
+  html.dark .omni-dashboard .text-\[\#1D4ED8\],
+  html.dark .omni-dashboard .text-blue-700:not([class*="dark:text-"]),
+  html.dark .omni-dashboard .text-blue-600:not([class*="dark:text-"]) {
+    color: #38bdf8;
+  }
+
+  /* Badges ámbar y morados */
+  html.dark .omni-dashboard .bg-amber-50:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-amber-100:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#FEF3C7\]:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#FFFBEB\]:not([class*="dark:bg-"]) {
+    background-color: rgba(245, 158, 11, 0.14) !important;
   }
   html.dark .omni-dashboard .text-\[\#B45309\],
   html.dark .omni-dashboard .text-\[\#78350F\] {
@@ -165,44 +395,44 @@ input[type="range"] {
   html.dark .omni-dashboard .border-\[\#FDE68A\] {
     border-color: rgba(245, 158, 11, 0.3);
   }
-  html.dark .omni-dashboard .bg-\[\#DBEAFE\] {
-    background-color: rgba(56, 189, 248, 0.16);
+  html.dark .omni-dashboard .bg-violet-50:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-violet-100:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-purple-50:not([class*="dark:bg-"]),
+  html.dark .omni-dashboard .bg-\[\#EDE9FE\]:not([class*="dark:bg-"]) {
+    background-color: rgba(139, 92, 246, 0.18) !important;
   }
-  html.dark .omni-dashboard .text-\[\#2563EB\] {
-    color: #38bdf8;
-  }
-  html.dark .omni-dashboard .bg-\[\#FEE2E2\] {
-    background-color: rgba(239, 68, 68, 0.16);
-  }
-  html.dark .omni-dashboard .text-\[\#DC2626\] {
-    color: #f87171;
+  html.dark .omni-dashboard .text-\[\#7C3AED\] {
+    color: #c4b5fd;
   }
 
-  /* Formularios, selects, fechas y tablas nítidos en MODO OSCURO */
-  html.dark .omni-dashboard input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([aria-label="Buscar en todo el sistema"]),
-  html.dark .omni-dashboard select,
-  html.dark .omni-dashboard textarea {
-    background-color: #090d0c;
-    border-color: rgba(255, 255, 255, 0.14);
-    color: #f4f4f5;
+  /* 8. Tarjetas de formulario y campos nítidos en MODO OSCURO */
+  html.dark .omni-dashboard main form.bg-white,
+  html.dark .omni-dashboard main .bg-white:has(> form) {
+    background-color: #14181b;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.75);
+  }
+  html.dark .omni-dashboard main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([aria-label="Buscar en todo el sistema"]),
+  html.dark .omni-dashboard main select,
+  html.dark .omni-dashboard main textarea {
+    background-color: #0a0e0d !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    color: #f4f4f5 !important;
     color-scheme: dark;
   }
-  html.dark .omni-dashboard input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([aria-label="Buscar en todo el sistema"]):focus,
-  html.dark .omni-dashboard select:focus,
-  html.dark .omni-dashboard textarea:focus {
-    border-color: #10b981;
+  html.dark .omni-dashboard main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([aria-label="Buscar en todo el sistema"]):focus,
+  html.dark .omni-dashboard main select:focus,
+  html.dark .omni-dashboard main textarea:focus {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
     outline: none;
   }
-  html.dark .omni-dashboard input::placeholder,
-  html.dark .omni-dashboard textarea::placeholder {
-    color: #71717a;
+  html.dark .omni-dashboard main input::placeholder,
+  html.dark .omni-dashboard main textarea::placeholder {
+    color: #71717a !important;
   }
-  html.dark .omni-dashboard select option {
-    background-color: #18181b;
+  html.dark .omni-dashboard main select option {
+    background-color: #14181b;
     color: #f4f4f5;
-  }
-  html.dark .omni-dashboard table th,
-  html.dark .omni-dashboard table td {
-    border-color: rgba(255, 255, 255, 0.08);
   }
 }
