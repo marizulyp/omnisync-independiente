@@ -46,7 +46,17 @@ export const metadata: Metadata = {
 const SCRIPT_TEMA = `
 (function() {
   try {
-    var tema = localStorage.getItem("omnisync-tema");
+    var params = new URLSearchParams(window.location.search);
+    var temaUrl = params.get("tema");
+    if (!temaUrl) {
+      var cb = params.get("callbackUrl") || "";
+      if (cb.indexOf("tema=light") !== -1) temaUrl = "light";
+      else if (cb.indexOf("tema=dark") !== -1) temaUrl = "dark";
+    }
+    if (temaUrl === "light" || temaUrl === "dark") {
+      localStorage.setItem("omnisync-tema", temaUrl);
+    }
+    var tema = temaUrl || localStorage.getItem("omnisync-tema");
     if (tema === "light") {
       document.documentElement.classList.remove("dark");
     } else {
