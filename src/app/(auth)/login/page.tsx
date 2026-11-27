@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [mostrarPassword, setMostrarPassword] = useState(false) // ESTADO PARA EL OJITO
+  const [mostrarPassword, setMostrarPassword] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError("")
-    
+
     const formData = new FormData(e.currentTarget)
     const email = formData.get("email") as string
     const password = formData.get("password") as string
@@ -53,28 +53,33 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 flex items-center justify-center p-4 relative overflow-hidden font-sans selection:bg-emerald-500/30">
-      
-      <motion.div 
-        className="fixed top-0 left-0 w-[600px] h-[600px] bg-emerald-600/15 rounded-full pointer-events-none blur-[120px] z-0" 
-        animate={{ x: mousePosition.x - 300, y: mousePosition.y - 300 }} 
-        transition={{ type: "tween", ease: "easeOut", duration: 0.2 }} 
+
+      <motion.div
+        className="fixed top-0 left-0 w-[600px] h-[600px] bg-emerald-600/15 rounded-full pointer-events-none blur-[120px] z-0"
+        animate={{ x: mousePosition.x - 300, y: mousePosition.y - 300 }}
+        transition={{ type: "tween", ease: "easeOut", duration: 0.2 }}
       />
 
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none z-0"></div>
 
       <div className="w-full max-w-[420px] bg-zinc-900/80 backdrop-blur-xl rounded-3xl border border-white/10 shadow-[0_0_50px_rgba(16,185,129,0.05)] relative z-10 overflow-hidden">
-        
+
         <div className="px-8 py-8 border-b border-white/5 bg-white/5 text-center">
           <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2">
-            Omni<span className="text-emerald-400">Sync</span>
+            Orbi<span className="text-emerald-400">Sync</span>
           </h1>
-          <p className="text-[14px] text-zinc-400">Inicia sesión en tu espacio de trabajo</p>
+          <p className="text-[13.5px] text-zinc-400 leading-relaxed">
+            Todo tu negocio en una misma órbita. Tu ecosistema operativo, siempre en sincronía.
+          </p>
+          <p className="text-[12.5px] text-zinc-500 mt-2">
+            Inicia sesión en tu espacio de trabajo
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-8">
           {error && (
             <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-[13.5px] flex items-start gap-3">
-              <Icon className="shrink-0 mt-0.5" name="error" size={18} /> 
+              <Icon className="shrink-0 mt-0.5" name="error" size={18} />
               <p>{error}</p>
             </div>
           )}
@@ -91,12 +96,12 @@ export default function LoginPage() {
                 <Link className="text-[12px] text-emerald-400 hover:text-emerald-300 transition-colors" href="/olvide-password">¿Olvidaste tu contraseña?</Link>
               </div>
               <div className="relative">
-                <input 
-                  name="password" 
-                  type={mostrarPassword ? "text" : "password"} 
-                  required 
-                  placeholder="••••••••" 
-                  className="w-full rounded-xl bg-black/50 border border-white/10 pl-4 pr-11 py-3.5 text-[14px] text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors placeholder:text-zinc-600" 
+                <input
+                  name="password"
+                  type={mostrarPassword ? "text" : "password"}
+                  required
+                  placeholder="••••••••"
+                  className="w-full rounded-xl bg-black/50 border border-white/10 pl-4 pr-11 py-3.5 text-[14px] text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors placeholder:text-zinc-600"
                 />
                 <button
                   type="button"
@@ -117,7 +122,7 @@ export default function LoginPage() {
 
         <div className="px-8 py-6 bg-black/20 border-t border-white/5 text-center">
           <p className="text-[13.5px] text-zinc-400">
-            ¿Aún no tienes tu plataforma? <br/>
+            ¿Aún no tienes tu plataforma? <br />
             <Link className="text-emerald-400 hover:text-emerald-300 font-bold inline-block mt-1" href="/registro">Regístrate y Crea tu sistema a medida</Link>
           </p>
         </div>

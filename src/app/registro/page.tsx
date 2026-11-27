@@ -35,9 +35,9 @@ export default function RegistroPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [mostrarPassword, setMostrarPassword] = useState(false) // OJITO CONTRASEÑA 1
-  const [mostrarConfirmPassword, setMostrarConfirmPassword] = useState(false) // OJITO CONTRASEÑA 2
-  
+  const [mostrarPassword, setMostrarPassword] = useState(false)
+  const [mostrarConfirmPassword, setMostrarConfirmPassword] = useState(false)
+
   const [datos, setDatos] = useState({
     nombre: "",
     apellido: "",
@@ -47,12 +47,11 @@ export default function RegistroPage() {
     nombreNegocio: "",
     tipoNegocio: "veterinaria",
     password: "",
-    confirmPassword: "" // NUEVO CAMPO DE ESTADO
+    confirmPassword: ""
   })
-  
+
   const [modulos, setModulos] = useState<string[]>(["agenda", "fichas", "atenciones", "inventario", "finanzas"])
 
-  // Rastreador del cursor para el efecto de luz
   useEffect(() => {
     const updateMousePosition = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY })
@@ -114,37 +113,39 @@ export default function RegistroPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 flex items-center justify-center p-4 relative overflow-hidden font-sans selection:bg-emerald-500/30">
-      
+
       {/* Luz esmeralda que sigue el cursor */}
-      <motion.div 
-        className="fixed top-0 left-0 w-[600px] h-[600px] bg-emerald-600/15 rounded-full pointer-events-none blur-[120px] z-0" 
-        animate={{ x: mousePosition.x - 300, y: mousePosition.y - 300 }} 
-        transition={{ type: "tween", ease: "easeOut", duration: 0.2 }} 
+      <motion.div
+        className="fixed top-0 left-0 w-[600px] h-[600px] bg-emerald-600/15 rounded-full pointer-events-none blur-[120px] z-0"
+        animate={{ x: mousePosition.x - 300, y: mousePosition.y - 300 }}
+        transition={{ type: "tween", ease: "easeOut", duration: 0.2 }}
       />
-      
+
       {/* Cuadrícula de fondo */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none z-0"></div>
 
       <div className="w-full max-w-[550px] bg-zinc-900/80 backdrop-blur-xl rounded-3xl border border-white/10 shadow-[0_0_50px_rgba(16,185,129,0.05)] relative z-10 overflow-hidden my-8">
-        
+
         <div className="px-8 py-6 border-b border-white/5 bg-white/5 text-center">
           <h1 className="text-2xl font-extrabold tracking-tight text-white">
-            Omni<span className="text-emerald-400">Sync</span>
+            Orbi<span className="text-emerald-400">Sync</span>
           </h1>
-          <p className="text-[13px] text-zinc-400 mt-1">Crea tu ecosistema de gestión a medida</p>
+          <p className="text-[13px] text-zinc-400 mt-1.5 leading-relaxed">
+            Todo tu negocio en una misma órbita. Tu ecosistema operativo, siempre en sincronía.
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-8">
           {error && (
             <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-[13.5px] flex items-start gap-3">
-              <Icon className="shrink-0 mt-0.5" name="error" size={18} /> 
+              <Icon className="shrink-0 mt-0.5" name="error" size={18} />
               <p>{error}</p>
             </div>
           )}
 
           {paso === 1 && (
             <div className="flex flex-col gap-5 animate-in fade-in slide-in-from-right-4 duration-300">
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[13px] font-medium text-zinc-400 mb-1.5">Nombre</label>
@@ -152,23 +153,23 @@ export default function RegistroPage() {
                 </div>
                 <div>
                   <label className="block text-[13px] font-medium text-zinc-400 mb-1.5">Apellido</label>
-                  <input name="apellido" value={datos.apellido} onChange={handleDatos} type="text" placeholder="Ej: Pérez" className="w-full rounded-xl bg-black/50 border border-white/10 px-4 py-3 text-[14px] text-white focus:outline-none focus:border-emerald-500 transition-colors placeholder:text-zinc-600" />
+                  <input name="apellido" value={datos.apellido} onChange={handleDatos} type="text" placeholder="Ej: Pérez" className="w-full rounded-xl bg-black/50 border border-white/10 px-4 py-3 text-[14px] text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors placeholder:text-zinc-600" />
                 </div>
               </div>
 
               <div>
                 <label className="block text-[13px] font-medium text-zinc-400 mb-1.5">Cédula (CC)</label>
-                <input name="cc" value={datos.cc} onChange={handleDatos} type="text" placeholder="Número de documento" className="w-full rounded-xl bg-black/50 border border-white/10 px-4 py-3 text-[14px] text-white focus:outline-none focus:border-emerald-500 transition-colors placeholder:text-zinc-600" />
+                <input name="cc" value={datos.cc} onChange={handleDatos} type="text" placeholder="Número de documento" className="w-full rounded-xl bg-black/50 border border-white/10 px-4 py-3 text-[14px] text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors placeholder:text-zinc-600" />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[13px] font-medium text-zinc-400 mb-1.5">Correo electrónico</label>
-                  <input name="email" value={datos.email} onChange={handleDatos} type="email" placeholder="correo@ejemplo.com" className="w-full rounded-xl bg-black/50 border border-white/10 px-4 py-3 text-[14px] text-white focus:outline-none focus:border-emerald-500 transition-colors placeholder:text-zinc-600" />
+                  <input name="email" value={datos.email} onChange={handleDatos} type="email" placeholder="correo@ejemplo.com" className="w-full rounded-xl bg-black/50 border border-white/10 px-4 py-3 text-[14px] text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors placeholder:text-zinc-600" />
                 </div>
                 <div>
                   <label className="block text-[13px] font-medium text-zinc-400 mb-1.5">Confirmar correo</label>
-                  <input name="confirmEmail" value={datos.confirmEmail} onChange={handleDatos} type="email" placeholder="correo@ejemplo.com" className="w-full rounded-xl bg-black/50 border border-white/10 px-4 py-3 text-[14px] text-white focus:outline-none focus:border-emerald-500 transition-colors placeholder:text-zinc-600" />
+                  <input name="confirmEmail" value={datos.confirmEmail} onChange={handleDatos} type="email" placeholder="correo@ejemplo.com" className="w-full rounded-xl bg-black/50 border border-white/10 px-4 py-3 text-[14px] text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors placeholder:text-zinc-600" />
                 </div>
               </div>
 
@@ -192,14 +193,14 @@ export default function RegistroPage() {
                 <div>
                   <label className="block text-[13px] font-medium text-zinc-400 mb-1.5">Contraseña</label>
                   <div className="relative">
-                    <input 
-                      name="password" 
-                      value={datos.password} 
-                      onChange={handleDatos} 
-                      type={mostrarPassword ? "text" : "password"} 
-                      minLength={6} 
-                      placeholder="••••••••" 
-                      className="w-full rounded-xl bg-black/50 border border-white/10 pl-4 pr-11 py-3 text-[14px] text-white focus:outline-none focus:border-emerald-500 transition-colors placeholder:text-zinc-600" 
+                    <input
+                      name="password"
+                      value={datos.password}
+                      onChange={handleDatos}
+                      type={mostrarPassword ? "text" : "password"}
+                      minLength={6}
+                      placeholder="••••••••"
+                      className="w-full rounded-xl bg-black/50 border border-white/10 pl-4 pr-11 py-3 text-[14px] text-white focus:outline-none focus:border-emerald-500 transition-colors placeholder:text-zinc-600"
                     />
                     <button
                       type="button"
@@ -214,14 +215,14 @@ export default function RegistroPage() {
                 <div>
                   <label className="block text-[13px] font-medium text-zinc-400 mb-1.5">Confirmar contraseña</label>
                   <div className="relative">
-                    <input 
-                      name="confirmPassword" 
-                      value={datos.confirmPassword} 
-                      onChange={handleDatos} 
-                      type={mostrarConfirmPassword ? "text" : "password"} 
-                      minLength={6} 
-                      placeholder="••••••••" 
-                      className="w-full rounded-xl bg-black/50 border border-white/10 pl-4 pr-11 py-3 text-[14px] text-white focus:outline-none focus:border-emerald-500 transition-colors placeholder:text-zinc-600" 
+                    <input
+                      name="confirmPassword"
+                      value={datos.confirmPassword}
+                      onChange={handleDatos}
+                      type={mostrarConfirmPassword ? "text" : "password"}
+                      minLength={6}
+                      placeholder="••••••••"
+                      className="w-full rounded-xl bg-black/50 border border-white/10 pl-4 pr-11 py-3 text-[14px] text-white focus:outline-none focus:border-emerald-500 transition-colors placeholder:text-zinc-600"
                     />
                     <button
                       type="button"
@@ -249,7 +250,7 @@ export default function RegistroPage() {
             <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-right-4 duration-300">
               <h2 className="text-[18px] font-bold text-white">Arma tu plan</h2>
               <p className="text-[13px] text-zinc-400 mb-2">Selecciona las herramientas que usarás en tu negocio.</p>
-              
+
               <div className="flex flex-col gap-3">
                 {MODULOS_POR_NEGOCIO[datos.tipoNegocio].map((mod) => (
                   <label key={mod.id} className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-200 ${modulos.includes(mod.id) ? "border-emerald-500/50 bg-emerald-500/5" : "border-white/10 bg-black/20 hover:border-white/20 hover:bg-black/40"}`}>

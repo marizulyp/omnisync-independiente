@@ -18,7 +18,7 @@ export async function generateMetadata({
   const fmt = (iso: string) => iso.split("-").reverse().join("")
   const ahora = new Date()
   const hhmm = `${String(ahora.getHours()).padStart(2, "0")}${String(ahora.getMinutes()).padStart(2, "0")}`
-  return { title: `Informe_OmniSync_${fmt(desde)}_${fmt(hasta)}_${hhmm}` }
+  return { title: `Informe_OrbiSync_${fmt(desde)}_${fmt(hasta)}_${hhmm}` }
 }
 
 function formatCOP(n: number) {

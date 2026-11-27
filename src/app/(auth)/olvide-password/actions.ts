@@ -28,9 +28,9 @@ export async function solicitarRecuperacion(formData: FormData) {
     
     // ENVIAMOS EL CORREO CON EL DISEÑO FINAL DE OMNISYNC
     await resend.emails.send({
-      from: "OmniSync Seguridad <onboarding@resend.dev>", // En producción cambiará a tu dominio
+      from: "OrbiSync Seguridad <onboarding@resend.dev>", // En producción cambiará a tu dominio
       to: email, 
-      subject: "Restablece tu contraseña de OmniSync",
+      subject: "Restablece tu contraseña de OrbiSync",
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 40px 20px; background-color: #f4f4f5; text-align: center;">
           <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">

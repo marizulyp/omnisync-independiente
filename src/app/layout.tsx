@@ -27,7 +27,8 @@ export const metadata: Metadata = {
     default: CLINICA.nombre,
     template: `%s | ${CLINICA.nombre}`,
   },
-  description: "Plataforma de gestión modular — OmniSync",
+  description:
+    "Todo tu negocio en una misma órbita. Tu ecosistema operativo, siempre en sincronía — OrbiSync",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

@@ -43,7 +43,7 @@ input[type="range"] {
    Solo aplica en pantalla; la impresión (PDF/Facturas) sigue en blanco.
    ===================================================================== */
 @media screen {
-  /* ── Identidad OmniSync en ambos modos (reemplaza el azul marino viejo por esmeralda) ── */
+  /* ── Identidad OrbiSync en ambos modos (reemplaza el azul marino viejo por esmeralda) ── */
   .omni-dashboard .bg-\[\#1E3A6E\],
   .omni-dashboard .bg-\[\#1e3a6e\] {
     background-color: #059669;
@@ -125,7 +125,7 @@ input[type="range"] {
     color: #e4e4e7 !important;
   }
 
-  /* 3. Superficies blancas y claras -> tarjetas oscuras OmniSync */
+  /* 3. Superficies blancas y claras -> tarjetas oscuras OrbiSync */
   html.dark .omni-dashboard .bg-white:not([class*="dark:bg-"]),
   html.dark .omni-dashboard .bg-slate-50:not([class*="dark:bg-"]),
   html.dark .omni-dashboard .bg-gray-50:not([class*="dark:bg-"]),
@@ -482,7 +482,7 @@ input[type="range"] {
    Solo aplica en pantalla; la impresión (PDF/Facturas) sigue en blanco.
    ===================================================================== */
 @media screen {
-  /* ── Identidad OmniSync en ambos modos (reemplaza el azul marino viejo por esmeralda) ── */
+  /* ── Identidad OrbiSync en ambos modos (reemplaza el azul marino viejo por esmeralda) ── */
   .omni-dashboard .bg-\[\#1E3A6E\],
   .omni-dashboard .bg-\[\#1e3a6e\] {
     background-color: #059669;
@@ -564,7 +564,7 @@ input[type="range"] {
     color: #e4e4e7 !important;
   }
 
-  /* 3. Superficies blancas y claras -> tarjetas oscuras OmniSync */
+  /* 3. Superficies blancas y claras -> tarjetas oscuras OrbiSync */
   html.dark .omni-dashboard .bg-white:not([class*="dark:bg-"]),
   html.dark .omni-dashboard .bg-slate-50:not([class*="dark:bg-"]),
   html.dark .omni-dashboard .bg-gray-50:not([class*="dark:bg-"]),

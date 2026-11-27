@@ -21,7 +21,7 @@ export async function registrarNegocio(formData: FormData) {
 
   const usuarioExistente = await prisma.usuario.findUnique({ where: { email } })
   if (usuarioExistente) {
-    return { error: "Este correo electrónico ya está registrado en OmniSync." }
+    return { error: "Este correo electrónico ya está registrado en OrbiSync." }
   }
 
   try {
