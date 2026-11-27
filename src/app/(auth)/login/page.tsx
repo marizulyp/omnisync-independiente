@@ -68,12 +68,7 @@ export default function LoginPage() {
           <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2">
             Orbi<span className="text-emerald-400">Sync</span>
           </h1>
-          <p className="text-[13.5px] text-zinc-400 leading-relaxed">
-            Todo tu negocio en una misma órbita. Tu ecosistema operativo, siempre en sincronía.
-          </p>
-          <p className="text-[12.5px] text-zinc-500 mt-2">
-            Inicia sesión en tu espacio de trabajo
-          </p>
+          <p className="text-[14px] text-zinc-400">Inicia sesión en tu espacio de trabajo</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-8">

@@ -130,9 +130,7 @@ export default function RegistroPage() {
           <h1 className="text-2xl font-extrabold tracking-tight text-white">
             Orbi<span className="text-emerald-400">Sync</span>
           </h1>
-          <p className="text-[13px] text-zinc-400 mt-1.5 leading-relaxed">
-            Todo tu negocio en una misma órbita. Tu ecosistema operativo, siempre en sincronía.
-          </p>
+          <p className="text-[13px] text-zinc-400 mt-1">Crea tu ecosistema de gestión a medida</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-8">
